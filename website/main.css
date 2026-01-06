@@ -10,7 +10,7 @@ body {
 #map-canvas {
     width: 80%;
     height: 400px;
-    padding: 50px;
+    padding: 0px;
     margin: 0;
     background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAwAAAAMCAMAAABhq6zVAAAACVBMVEUAAADl5eX////EwbxGAAAAAXRSTlMAQObYZgAAABFJREFUeAFjYESCKACdT38ZAAWhAAxcPQc7AAAAAElFTkSuQmCC) repeat scroll 0 0 #f9f9f9;
     cursor: move;
