@@ -28,5 +28,3 @@ body {
 .leaflet-control-attribution a {
     text-decoration: underline;
 }
-
-#map { height: 500px; }
