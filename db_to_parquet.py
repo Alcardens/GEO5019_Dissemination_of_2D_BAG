@@ -1,14 +1,14 @@
 import duckdb as db
 import time
 
-con = db.connect("bag.db")
+con = db.connect("vbo.db")
 
 con.load_extension('spatial')
 
 con.sql('''COPY 
-    (SELECT * FROM panden ORDER BY
+    (SELECT * FROM verblijfsobjecten ORDER BY
     ST_Hilbert(geom, ST_Extent(ST_MakeEnvelope(0, 280000, 310000, 640000))))
-    TO 'bag.parquet' (FORMAT 'parquet', COMPRESSION 'zstd');''')
+    TO 'vbo.parquet' (FORMAT 'parquet', COMPRESSION 'zstd');''')
 
 minx = 250000
 miny = 590000
@@ -18,7 +18,7 @@ maxy = 600000
 tic = time.time()
 total = con.sql(f"""
     SELECT COUNT(*) 
-    FROM 'bag.parquet'
+    FROM 'vbo.parquet'
     WHERE ST_Within(geom, ST_Extent(ST_MakeEnvelope({minx}, {miny}, {maxx}, {maxy})))
 """).fetchone()[0]
 tac = time.time()

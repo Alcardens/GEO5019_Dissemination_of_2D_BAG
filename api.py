@@ -7,7 +7,7 @@ import duckdb
 app = FastAPI()
 
 ### Connect to the DuckDB (backend that was set up earlier in this assignment)
-db = duckdb.connect("bag.db", read_only=True)
+db = duckdb.connect()
 db.execute("INSTALL spatial")
 db.execute("LOAD spatial")
 
@@ -22,230 +22,111 @@ def read_root():
 
 ### Collections Endpoint
 @app.get("/collections")
-def read_collections(
-        limit: int = Query(50, ge=1, le=1000), # always show at least 1 and no more than 1000
-        offset: int = Query(0, ge=0) # ensure that offset is always positive
-):
-
-    ## Count how many municipalities there are
-    total_count_municipalities = db.execute("""
-        SELECT COUNT(DISTINCT municipality)
-        FROM buildings_join;
-    """).fetchone()
-    total_count = total_count_municipalities[0]
-
-    ## Get info about the municipalities per municipality
-    db_result = db.execute("""
-        SELECT municipality, m_code, COUNT(*) AS building_count
-        FROM buildings_join 
-        WHERE municipality IS NOT NULL
-        GROUP BY municipality, m_code
-        ORDER BY municipality
-        LIMIT ? OFFSET ?;
-    """, [limit, offset]).fetchall()
-
-    ## First make an array with the municipality info
+def read_collections():
     collection = []
-    for row in db_result:
-        municipality = row[0]
-        building_count = row[2]
 
-        municipality_feature = {
-            "id": municipality,
-            "title": f"Buildings in {municipality}",
-            "description": f"Building footprints for {municipality} municipality",
-            "itemType": "feature",
-            "building_count": building_count,
-            "links": [
-                {
-                    "href": f"/collections/{municipality}/items",
-                    "rel": "items",
-                    "type": "application/geo+json",
-                    "title": f"Buildings in {municipality}"
-                }
-            ]
-        }
-        collection.append(municipality_feature)
+    total_count_panden = db.execute("""
+               SELECT COUNT(*)
+               FROM 'bag.parquet'""").fetchone()
+
+    panden = {
+        "id": 'panden',
+        "title": f"panden in the Netherlands",
+        "description": f"pand footprints for the Netherlands",
+        "itemType": "feature",
+        "pand_count": total_count_panden,
+        "links": [
+            {
+                "href": f"/collections/panden/items",
+                "rel": "items",
+                "type": "application/geo+json",
+                "title": f"panden in the Netherlands"
+            }
+        ]
+    }
+    collection.append(panden)
+
+    total_count_vbo = db.execute("""
+               SELECT COUNT(*)
+               FROM 'vbo.parquet'""").fetchone()
+
+    vbo = {
+        "id": 'verblijfsobjecten',
+        "title": f"verblijfsobjecten in the Netherlands",
+        "description": f"pand footprints for the Netherlands",
+        "itemType": "feature",
+        "pand_count": total_count_vbo,
+        "links": [
+            {
+                "href": f"/collections/verblijfsobjecten/items",
+                "rel": "items",
+                "type": "application/geo+json",
+                "title": f"panden in the Netherlands"
+            }
+        ]
+    }
+    collection.append(vbo)
 
     ## Add metadata about limit and offset etc. and navigation links when applicable
     collections = {
         "collections": collection,
-        "total_feature_count": total_count,
-        "current_limit": limit,
-        "current_offset": offset,
-        "nr_of_returned_features": len(collection),
+        "total_feature_count": 7,
         "links": []
     }
-
-    ## When applicable, add links to the previous and next page (pagination)
-    # Link to next page
-    if offset + limit < total_count:
-        collections["links"].append({
-            "href": f"/collections?limit={limit}&offset={offset+limit}",
-            "rel": "next",
-            "type": "application/geo+json",
-            "title": f"Next page of municipalities"
-        })
-
-    # Link to previous page
-    if offset > 0:
-        prev_offset = max(0, offset - limit) # ensure that offset is always positive
-        collections["links"].append({
-            "href": f"/collections?limit={limit}&offset={prev_offset}",
-            "rel": "previous",
-            "type": "application/geo+json",
-            "title": f"Previous page of municipalities"
-        })
 
     return collections
 
-
-
-### Municipality-based Endpoints - items
-@app.get("/collections/{municipality}/items")
+@app.get("/collections/panden/items")
 def read_municipality_items(
-        municipality: str,
-        limit: int = Query(50, ge=1, le=1000), # always show at least 1 and no more than 1000
-        offset: int = Query(0, ge=0) # ensure that offset is always positive
-):
-
-    ## Count how many buildings in this municipality
-    total_count_b_in_m = db.execute("""
-        SELECT COUNT(*)
-        FROM buildings_join
-        WHERE municipality = ?;
-    """, [municipality]).fetchone()
-    total_count = total_count_b_in_m[0]
-
-    ## Get the buildings in this municipality
-    db_result = db.execute("""
-        SELECT id, municipality, ST_AsGeoJSON(geom) AS geom
-        FROM buildings_join 
-        WHERE municipality = ?
-        LIMIT ? OFFSET ?;
-    """, [municipality, limit, offset]).fetchall()
-
-    ## First build Features array per building
-    features = []
-    for row in db_result:
-        id = row[0]
-        municipality = row[1]
-        geom = row[2]
-
-        feature = {
-            "type": "Feature",
-            "geometry": json.loads(geom),
-            "properties": {
-                "id": id,
-                "municipality_name": municipality
-            }
-        }
-        features.append(feature)
-
-    ## Build a FeatureCollection from the buildings (Features) in the municipality and add metadata
-    feature_collection = {
-        "type": "FeatureCollection",
-        "features": features,
-        "total_feature_count": total_count,
-        "current_limit": limit,
-        "current_offset": offset,
-        "nr_of_returned_features": len(features),
-        "links": []
-    }
-
-    ## When applicable, add links to the previous and next page (pagination)
-    # Link to next page
-    if offset + limit < total_count:
-        feature_collection["links"].append({
-            "href": f"/collections/{municipality}/items?limit={limit}&offset={offset+limit}",
-            "rel": "next",
-            "type": "application/geo+json",
-            "title": f"Next page of buildings (features) in {municipality} municipality"
-        })
-
-    # Link to previous page
-    if offset > 0:
-        prev_offset = max(0, offset - limit) # ensure that offset is always positive
-        feature_collection["links"].append({
-            "href": f"/collections/{municipality}/items?limit={limit}&offset={prev_offset}",
-            "rel": "previous",
-            "type": "application/geo+json",
-            "title": f"Previous page of buildings (features) in {municipality} municipality"
-        })
-
-    return feature_collection
-
-
-### Municipality-based Endpoints - building_id
-@app.get("/collections/{municipality}/items/{building_id}")
-def read_building_id(
-        municipality: str,
-        building_id: str
-):
-
-    ## Get the information about specific building
-    db_result = db.execute("""
-        SELECT id, municipality, ST_AsGeoJSON(geom) AS geom
-        FROM buildings_join 
-        WHERE municipality = ? 
-        AND id = ?;
-    """, [municipality, building_id]).fetchone()
-
-    id, municipality, geom = db_result
-
-    building = {
-        "type": "Feature",
-        "geometry": json.loads(geom),
-        "properties": {
-            "id": id,
-            "municipality_name": municipality
-        }
-    }
-
-    return building
-
-
-
-### Spatial Query Endpoints
-@app.get("/buildings/bbox")
-def read_bbox(
         minx: float = Query(default=78600.0), # for default bbox values I took the assignment bbox
         miny: float = Query(default=445000.0),
         maxx: float = Query(default=85800.0),
         maxy: float = Query(default=450000.0),
+        crs: str = Query(default='EPSG:28992'),
         limit: int = Query(50, ge=1, le=1000), # always show at least 1 and no more than 1000
         offset: int = Query(0, ge=0) # ensure that offset is always positive
 ):
-
     ## Count how many buildings in the bbox
     total_count_b_in_bbox = db.execute("""
-        SELECT COUNT(*)
-        FROM buildings_join
-        WHERE ST_Intersects(geom, ST_MakeEnvelope(?,?,?,?));
-    """, [minx, miny, maxx, maxy]).fetchone()
+            SELECT COUNT(*)
+            FROM 'bag.parquet'
+            WHERE ST_Intersects(geom, ST_MakeEnvelope(?,?,?,?));
+        """, [minx, miny, maxx, maxy]).fetchone()
     total_count = total_count_b_in_bbox[0]
 
     ## Get the buildings in this bbox
-    db_result = db.execute("""
-        SELECT id, municipality, ST_AsGeoJSON(geom) AS geom
-        FROM buildings_join 
-        WHERE ST_Intersects(geom, ST_MakeEnvelope(?,?,?,?))
-        LIMIT ? OFFSET ?;
-    """, [minx, miny, maxx, maxy, limit, offset]).fetchall()
+    if crs == 'EPSG:28992':
+        db_result = db.execute("""
+                SELECT identificatie, status, oorspronkelijkBouwjaar, documentdatum, ST_AsGeoJSON(geom) AS geom
+                FROM 'bag.parquet'
+                WHERE ST_Intersects(geom, ST_MakeEnvelope(?,?,?,?))
+                LIMIT ? OFFSET ?;
+            """, [minx, miny, maxx, maxy, limit, offset]).fetchall()
+    else:
+        db_result = db.execute("""
+                SELECT identificatie, status, oorspronkelijkBouwjaar, documentdatum, ST_AsGeoJSON(ST_Transform(geom,'EPSG:28992',?)) AS geom
+                FROM 'bag.parquet'
+                WHERE ST_Intersects(geom, ST_MakeEnvelope(?,?,?,?))
+                LIMIT ? OFFSET ?;
+            """, [crs, minx, miny, maxx, maxy, limit, offset]).fetchall()
 
     ## First build Features array per building
     features = []
     for row in db_result:
         id = row[0]
-        municipality = row[1]
-        geom = row[2]
+        status = row[1]
+        year = row[2]
+        doc = row[3]
+        geom = row[4]
 
         feature = {
             "type": "Feature",
             "geometry": json.loads(geom),
             "properties": {
                 "id": id,
-                "municipality_name": municipality
+                "status": status,
+                "oorspronkelijkBouwjaar": year,
+                "documentdatum": doc
             }
         }
         features.append(feature)
@@ -265,20 +146,56 @@ def read_bbox(
     # Link to next page
     if offset + limit < total_count:
         feature_collection["links"].append({
-            "href": f"/buildings/bbox?minx={minx}&miny={miny}&maxx={maxx}&maxy={maxy}&limit={limit}&offset={offset+limit}",
+            "href": f"/panden/bbox?minx={minx}&miny={miny}&maxx={maxx}&maxy={maxy}&crs={crs}&limit={limit}&offset={offset + limit}",
             "rel": "next",
             "type": "application/geo+json",
-            "title": f"Next page of buildings (features) in the specified bounding box"
+            "title": f"Next page of panden (features) in the specified bounding box"
         })
 
     # Link to previous page
     if offset > 0:
-        prev_offset = max(0, offset - limit) # ensure that offset is always positive
+        prev_offset = max(0, offset - limit)  # ensure that offset is always positive
         feature_collection["links"].append({
-            "href": f"/buildings/bbox?minx={minx}&miny={miny}&maxx={maxx}&maxy={maxy}&limit={limit}&offset={prev_offset}",
+            "href": f"/panden/bbox?minx={minx}&miny={miny}&maxx={maxx}&maxy={maxy}&crs={crs}&limit={limit}&offset={prev_offset}",
             "rel": "previous",
             "type": "application/geo+json",
-            "title": f"Previous page of buildings (features) in the specified bounding box"
+            "title": f"Previous page of panden (features) in the specified bounding box"
         })
 
     return feature_collection
+
+
+### Municipality-based Endpoints - building_id
+@app.get("/collections/panden/items/{pandRef}")
+def read_building_id(
+        pandRef: str,
+        crs: str = Query(default='EPSG:28992')
+):
+
+    if crs == 'EPSG:28992':
+        db_result = db.execute("""
+            SELECT identificatie, status, oorspronkelijkBouwjaar, documentdatum, ST_AsGeoJSON(geom) AS geom
+            FROM 'bag.parguet' 
+            WHERE identificatie = ?;
+        """, [pandRef]).fetchone()
+    else:
+        db_result = db.execute("""
+            SELECT identificatie, status, oorspronkelijkBouwjaar, documentdatum, ST_AsGeoJSON(ST_Transform(geom,'EPSG:28992',?)) AS geom
+            FROM 'bag.parguet' 
+            WHERE identificatie = ?;
+        """, [crs,pandRef]).fetchone()
+
+    identificatie, status, oorspronkelijkBouwjaar, documentdatum, geom = db_result
+
+    building = {
+    "type": "Feature",
+        "geometry": json.loads(geom),
+        "properties": {
+            "id": identificatie,
+            "status": status,
+            "oorspronkelijkBouwjaar": oorspronkelijkBouwjaar,
+            "documentdatum": documentdatum
+        }
+    }
+
+    return building
