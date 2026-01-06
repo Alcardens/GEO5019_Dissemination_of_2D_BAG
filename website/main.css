@@ -3,14 +3,14 @@ body {
     width: 100vw;
     height: 100vh;
     overflow: hidden;
-    padding: 10%;
+    padding: 0;
     margin: 0;
 }
 
 #map-canvas {
     width: 80%;
     height: 400px;
-    padding: 0;
+    padding: 50px;
     margin: 0;
     background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAwAAAAMCAMAAABhq6zVAAAACVBMVEUAAADl5eX////EwbxGAAAAAXRSTlMAQObYZgAAABFJREFUeAFjYESCKACdT38ZAAWhAAxcPQc7AAAAAElFTkSuQmCC) repeat scroll 0 0 #f9f9f9;
     cursor: move;
