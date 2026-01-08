@@ -17,6 +17,10 @@ let map = L.map('map-canvas', {
 });
 map.attributionControl.setPrefix('');
 
+L.DomEvent.disableClickPropagation(
+  document.querySelector('.control-panel')
+);
+
 // BRT - (Base Registry Topography) BaseMap PDOK:
 let options = { maxZoom: 14, attribution: 'Map data: <a href="http://www.pdok.nl">BRT Achtergrondkaart</a>' }
 let basemap_pdok = new L.tileLayer('https://service.pdok.nl/brt/achtergrondkaart/wmts/v2_0/standaard/EPSG:28992/{z}/{x}/{y}.png', options);
@@ -96,9 +100,7 @@ function startDrawing() {
     document.getElementById('map-canvas').style.cursor = 'crosshair';
 
     // Listen for clicks on the map
-    setTimeout(function() {
-        map.on('click', onMapClick);
-    }, 500);
+    map.on('click', onMapClick);
 }
 
 // Function: Handle map clicks while drawing
