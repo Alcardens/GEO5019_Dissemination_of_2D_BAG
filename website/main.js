@@ -149,7 +149,10 @@ function onMapClick(e) {
 // Function: Draw the rectangle on the map
 function drawRectangle(point1, point2) {
     // Create a rectangle between the two points
-    let bounds = L.latLngBounds(point1, point2);
+    let bounds = [
+    [point1.lat, point1.lng],  // First corner you clicked
+    [point2.lat, point2.lng]   // Second corner you clicked
+];
 
     currentRectangle = L.rectangle(bounds, {
         color: '#2563eb',      // Blue outline
