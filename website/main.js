@@ -96,7 +96,9 @@ function startDrawing() {
     document.getElementById('map-canvas').style.cursor = 'crosshair';
 
     // Listen for clicks on the map
-    map.on('click', onMapClick);
+    setTimeout(function() {
+        map.on('click', onMapClick);
+    }, 100);
 }
 
 // Function: Handle map clicks while drawing
