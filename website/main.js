@@ -1,3 +1,5 @@
+// ===== MAP SETUP =====
+
 // Definition Rijksdriehoekstelsel (EPSG:28992)
 let res = [3440.640, 1720.320, 860.160, 430.080, 215.040, 107.520, 53.760, 26.880, 13.440, 6.720, 3.360, 1.680, 0.840, 0.420, 0.210, 0.105];
 let map = L.map('map-canvas', {
@@ -61,3 +63,157 @@ register_geocoder = function (mapInstance) {
 }
 
 register_geocoder(map)
+
+
+// ===== BOUNDING BOX DRAWING =====
+
+// Variables to store state
+let isDrawing = false;           // Are we currently drawing?
+let firstPoint = null;           // First corner clicked
+let secondPoint = null;          // Second corner clicked
+let currentRectangle = null;     // The rectangle shape on the map
+let tempMarker = null;           // Temporary marker for first point
+
+// Function: Start drawing mode
+function startDrawing() {
+    // Clear any existing box first
+    clearBoundingBox();
+
+    // Enable drawing mode
+    isDrawing = true;
+
+    // Update button states
+    document.getElementById('draw-btn').disabled = true;
+    document.getElementById('draw-btn').textContent = 'Click first corner...';
+
+    // Change cursor to crosshair
+    document.getElementById('map-canvas').style.cursor = 'crosshair';
+
+    // Listen for clicks on the map
+    map.on('click', onMapClick);
+}
+
+// Function: Handle map clicks while drawing
+function onMapClick(e) {
+    if (!isDrawing) return;
+
+    if (firstPoint === null) {
+        // FIRST CLICK - store first corner
+        firstPoint = e.latlng;
+
+        // Add a temporary marker to show where we clicked
+        tempMarker = L.circleMarker(firstPoint, {
+            radius: 5,
+            color: '#2563eb',
+            fillColor: '#2563eb',
+            fillOpacity: 0.5
+        }).addTo(map);
+
+        // Update button text
+        document.getElementById('draw-btn').textContent = 'Click second corner...';
+
+    } else {
+        // SECOND CLICK - store second corner and draw rectangle
+        secondPoint = e.latlng;
+
+        // Remove temporary marker
+        if (tempMarker) {
+            map.removeLayer(tempMarker);
+            tempMarker = null;
+        }
+
+        // Draw the rectangle
+        drawRectangle(firstPoint, secondPoint);
+
+        // Convert to RD coordinates and display
+        displayCoordinates(firstPoint, secondPoint);
+
+        // Stop drawing mode
+        isDrawing = false;
+        document.getElementById('map-canvas').style.cursor = '';
+        document.getElementById('draw-btn').disabled = false;
+        document.getElementById('draw-btn').textContent = 'Draw Bounding Box';
+        document.getElementById('clear-btn').disabled = false;
+
+        // Stop listening for clicks
+        map.off('click', onMapClick);
+    }
+}
+
+// Function: Draw the rectangle on the map
+function drawRectangle(point1, point2) {
+    // Create a rectangle between the two points
+    let bounds = L.latLngBounds(point1, point2);
+
+    currentRectangle = L.rectangle(bounds, {
+        color: '#2563eb',      // Blue outline
+        weight: 3,              // Line thickness
+        fillColor: '#2563eb',   // Blue fill
+        fillOpacity: 0.1        // Transparent fill
+    }).addTo(map);
+}
+
+// Function: Convert coordinates and display them
+function displayCoordinates(point1, point2) {
+    // Convert lat/lng to RD coordinates (EPSG:28992)
+    // Leaflet stores coordinates as [lat, lng] but proj4 needs [lng, lat]
+
+    let rdPoint1 = proj4('EPSG:4326', 'EPSG:28992', [point1.lng, point1.lat]);
+    let rdPoint2 = proj4('EPSG:4326', 'EPSG:28992', [point2.lng, point2.lat]);
+
+    // Calculate min and max values (because user can click in any order)
+    let xmin = Math.min(rdPoint1[0], rdPoint2[0]);
+    let xmax = Math.max(rdPoint1[0], rdPoint2[0]);
+    let ymin = Math.min(rdPoint1[1], rdPoint2[1]);
+    let ymax = Math.max(rdPoint1[1], rdPoint2[1]);
+
+    // Round to 2 decimal places for cleaner display
+    xmin = Math.round(xmin * 100) / 100;
+    ymin = Math.round(ymin * 100) / 100;
+    xmax = Math.round(xmax * 100) / 100;
+    ymax = Math.round(ymax * 100) / 100;
+
+    // Update the display
+    document.getElementById('xmin').textContent = xmin;
+    document.getElementById('ymin').textContent = ymin;
+    document.getElementById('xmax').textContent = xmax;
+    document.getElementById('ymax').textContent = ymax;
+
+    // Show the coordinates box
+    document.getElementById('coordinates').style.display = 'block';
+
+    // Log to console (useful for testing your API)
+    console.log('Bounding Box (RD New):');
+    console.log(`xmin: ${xmin}, ymin: ${ymin}, xmax: ${xmax}, ymax: ${ymax}`);
+    console.log(`API format: bbox=${xmin},${ymin},${xmax},${ymax}`);
+}
+
+// Function: Clear the bounding box
+function clearBoundingBox() {
+    // Remove rectangle from map
+    if (currentRectangle) {
+        map.removeLayer(currentRectangle);
+        currentRectangle = null;
+    }
+
+    // Remove temporary marker if exists
+    if (tempMarker) {
+        map.removeLayer(tempMarker);
+        tempMarker = null;
+    }
+
+    // Reset state
+    firstPoint = null;
+    secondPoint = null;
+    isDrawing = false;
+
+    // Update UI
+    document.getElementById('coordinates').style.display = 'none';
+    document.getElementById('clear-btn').disabled = true;
+    document.getElementById('draw-btn').disabled = false;
+    document.getElementById('draw-btn').textContent = 'Draw Bounding Box';
+    document.getElementById('map-canvas').style.cursor = '';
+
+    // Stop listening for clicks
+    map.off('click', onMapClick);
+}

@@ -4,7 +4,7 @@
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-        <title>BAG API</title>
+        <title>BAG API Viewer</title>
 
         <!-- Link CSS -->
         <!-- <link rel="stylesheet" href="/leaflet/dist/leaflet.css" /> -->
@@ -58,6 +58,100 @@
                 width: 100%;
             }
 
+            /* CONTROL PANEL - Floating box on top of map */
+            .control-panel {
+                position: absolute;
+                top: 10px;
+                right: 10px;
+                background: white;
+                padding: 1rem;
+                border-radius: 8px;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+                z-index: 1000;
+                min-width: 280px;
+            }
+
+            .control-panel h3 {
+                font-size: 1rem;
+                margin-bottom: 0.75rem;
+                color: #1f2937;
+            }
+
+            /* BUTTON STYLING */
+            .btn {
+                width: 100%;
+                padding: 0.625rem 1rem;
+                border: none;
+                border-radius: 6px;
+                font-size: 0.875rem;
+                font-weight: 500;
+                cursor: pointer;
+                transition: all 0.2s;
+                margin-bottom: 0.5rem;
+            }
+
+            .btn-primary {
+                background: #2563eb;
+                color: white;
+            }
+
+            .btn-primary:hover {
+                background: #1d4ed8;
+            }
+
+            .btn-primary:active {
+                background: #1e40af;
+            }
+
+            .btn-secondary {
+                background: #f3f4f6;
+                color: #374151;
+                border: 1px solid #d1d5db;
+            }
+
+            .btn-secondary:hover {
+                background: #e5e7eb;
+            }
+
+            .btn:disabled {
+                opacity: 0.5;
+                cursor: not-allowed;
+            }
+
+            /* COORDINATES DISPLAY */
+            .coordinates-box {
+                background: #f9fafb;
+                border: 1px solid #e5e7eb;
+                border-radius: 6px;
+                padding: 0.75rem;
+                margin-top: 0.75rem;
+                font-size: 0.875rem;
+                font-family: 'Courier New', monospace;
+            }
+
+            .coordinates-box .label {
+                font-weight: 600;
+                color: #374151;
+                margin-bottom: 0.5rem;
+            }
+
+            .coordinates-box .coord-line {
+                color: #6b7280;
+                line-height: 1.6;
+            }
+
+            .coordinates-box .coord-value {
+                color: #2563eb;
+                font-weight: 600;
+            }
+
+            .info-text {
+                font-size: 0.8rem;
+                color: #6b7280;
+                margin-top: 0.5rem;
+                font-style: italic;
+            }
+
             /* FOOTER STYLING */
             .footer {
                 background: #f9fafb;
@@ -87,7 +181,34 @@
             <p>Interactive viewer for Dutch Building and Address data (BAG)</p>
         </div>
 
-        <div id="map-canvas"></div>
+        <div id="map-canvas">
+            <!-- CONTROL PANEL - floating on top of map -->
+            <div class="control-panel">
+                <h3>📐 Draw Bounding Box</h3>
+
+                <!-- Button to start drawing -->
+                <button id="draw-btn" class="btn btn-primary" onclick="startDrawing()">
+                    Draw Bounding Box
+                </button>
+
+                <!-- Button to clear the box -->
+                <button id="clear-btn" class="btn btn-secondary" onclick="clearBoundingBox()" disabled>
+                    Clear Bounding Box
+                </button>
+
+                <p class="info-text">Click two corner points on the map</p>
+
+                <!-- Coordinates display (hidden until box is drawn) -->
+                <div id="coordinates" class="coordinates-box" style="display: none;">
+                    <div class="label">RD Coordinates:</div>
+                    <div class="coord-line">xmin: <span class="coord-value" id="xmin">-</span></div>
+                    <div class="coord-line">ymin: <span class="coord-value" id="ymin">-</span></div>
+                    <div class="coord-line">xmax: <span class="coord-value" id="xmax">-</span></div>
+                    <div class="coord-line">ymax: <span class="coord-value" id="ymax">-</span></div>
+                </div>
+            </div>
+        </div>
+
 
          <!-- FOOTER SECTION -->
         <div class="footer">
