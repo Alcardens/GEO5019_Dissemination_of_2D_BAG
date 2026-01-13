@@ -36,6 +36,126 @@ let baseLayers = {
 };
 let toc = L.control.layers(baseLayers).addTo(map);
 
+
+// ===== BUILDING VISUALIZATION =====
+
+// Layer to hold building geometries
+let buildingsLayer = L.layerGroup().addTo(map);
+
+// VERSION 1: Load single test building
+async function loadTestBuilding() {
+    const testPandId = '0503100000032914';
+    const apiUrl = `$http://127.0.0.1:8000/collections/panden/items/${testPandId}`;
+
+    try {
+        console.log('Loading test building from:', apiUrl);
+        const response = await fetch(apiUrl);
+
+        if (!response.ok) {
+            throw new Error(`API error: ${response.status}`);
+        }
+
+        const data = await response.json();
+        console.log('Test building data:', data);
+
+        // Add the building to the map
+        displayBuilding(data);
+
+    } catch (error) {
+        console.error('Failed to load test building:', error);
+    }
+}
+
+//// VERSION 2: Load buildings in visible viewport
+//async function loadBuildingsInView() {
+//    // Get visible map bounds
+//    const bounds = getVisibleBounds();
+//
+//    // Build API URL with bbox filter
+//    const apiUrl = `$http://127.0.0.1:8000/bbox?minx=${bounds.xmin}&miny=${bounds.ymin}&maxx=${bounds.xmax}&maxy=${bounds.ymax}`;
+//
+//    try {
+//        console.log('Loading buildings in viewport from:', apiUrl);
+//        const response = await fetch(apiUrl);
+//
+//        if (!response.ok) {
+//            throw new Error(`API error: ${response.status}`);
+//        }
+//
+//        const data = await response.json();
+//        console.log(`Loaded ${data.features ? data.features.length : 0} buildings`);
+//
+//        // Clear existing buildings
+//        buildingsLayer.clearLayers();
+//
+//        // Add each building to the map
+//        if (data.features && data.features.length > 0) {
+//            data.features.forEach(feature => {
+//                displayBuilding(feature);
+//            });
+//        }
+//
+//    } catch (error) {
+//        console.error('Failed to load buildings in viewport:', error);
+//    }
+//}
+
+// Function: Display a single building on the map
+function displayBuilding(feature) {
+    // Check if feature has geometry
+    if (!feature.geometry || !feature.geometry.coordinates) {
+        console.warn('Building has no geometry:', feature);
+        return;
+    }
+
+    // Convert GeoJSON to Leaflet layer
+    let buildingLayer = L.geoJSON(feature, {
+        style: {
+            color: '#ef4444',        // Red outline
+            weight: 2,               // Line thickness
+            fillColor: '#fca5a5',    // Light red fill
+            fillOpacity: 0.4         // Semi-transparent
+        },
+        // Handle coordinate conversion if needed
+        coordsToLatLng: function(coords) {
+            // If your API returns RD coordinates, convert them
+            // Assuming API returns WGS84 (standard GeoJSON)
+            return L.latLng(coords[1], coords[0]);
+        },
+        onEachFeature: function(feature, layer) {
+            // Add popup with building info
+            if (feature.properties) {
+                let popupContent = '<div style="font-size: 0.875rem;">';
+                popupContent += `<strong>Building ID:</strong> ${feature.id || 'N/A'}<br>`;
+
+                // Add other properties
+                for (let key in feature.properties) {
+                    popupContent += `<strong>${key}:</strong> ${feature.properties[key]}<br>`;
+                }
+
+                popupContent += '</div>';
+                layer.bindPopup(popupContent);
+            }
+        }
+    });
+
+    // Add to buildings layer
+    buildingLayer.addTo(buildingsLayer);
+}
+
+// Load test building on page load (VERSION 1 - for testing)
+// Comment this out when VERSION 2 is ready
+loadTestBuilding();
+
+// VERSION 2: Load buildings when map moves/zooms
+// Uncomment these lines when your bbox API endpoint is ready:
+/*
+map.on('moveend', loadBuildingsInView);  // Reload when map stops moving
+map.on('zoomend', loadBuildingsInView);  // Reload when zoom changes
+loadBuildingsInView();  // Initial load
+*/
+
+
 // Register a geocoder to the map app
 register_geocoder = function (mapInstance) {
   let polygon = null;
