@@ -14,6 +14,8 @@ app.add_middleware(
     allow_headers=["*"],  # Allows all headers
 )
 
+root = "http://0.0.0.0:8000"
+
 ### Connect to the DuckDB
 db = duckdb.connect()
 db.execute("INSTALL spatial")
@@ -22,7 +24,56 @@ db.execute("LOAD spatial")
 ### Test if the API is working, with a simple message on the root page
 @app.get("/")
 def read_root():
-    return {"message": "the API is running!"}
+    return {"title": "BAG API",
+            "description": "API for the Dutch BAG (Basisregistratie Adressen en Gebouwen) dataset maintained by Kadaster using (geo)parquet",
+            "keywords": ["BAG", "Panden", "PDOK", "Kadaster", "Nederland", "Netherlands", "Dutch", "Buildings", "Adressen", "Addresses"],
+            "links": [
+                {
+                    "rel": "self",
+                    "type": "application/json",
+                    "title": "JSON landing page",
+                    "href": f"{root}"
+                },
+                {
+                    "rel": "conformance",
+                    "type": "application/json",
+                    "title": "OGC API conformance classes implemented by the API offered at this endpoint",
+                    "href": f"{root}/conformance"
+                },
+                {
+                    "rel": "license",
+                    "type": "text/html",
+                    "title": "CC BY 4.0",
+                    "href": "https://creativecommons.org/licenses/by/4.0/deed.nl"
+                },
+                {
+                    "rel": "data",
+                    "type": "application/json",
+                    "title": "JSON representation of the list of all data layers (collections) served from this endpoint",
+                    "href": f"{root}/collections"
+                }
+            ]
+            }
+
+@app.get("/conformance")
+def read_conformance():
+    return {"links": [
+                {
+                    "rel": "self",
+                    "type": "application/json",
+                    "title": "OGC API conformance classes implemented by the API offered at this endpoint",
+                    "href": f"{root}/conformance"
+                }
+            ],
+            "conforms to": [
+                "http://www.opengis.net/spec/ogcapi-common-1/1.0/conf/json"
+        ]
+            }
+
+@app.get("/api")
+def read_api():
+    return {"title": "API definition TBA"
+            }
 
 ### Collections Endpoint
 @app.get("/collections")
@@ -110,7 +161,7 @@ def read_panden_items(
         where_list.append("ST_Intersects(pnd.geom, psc.geom)")
     where_statement = "WHERE " + " AND ".join(where_list) if len(where_list) > 0 else ""
 
-    geom_crs = "pnd.geom" if crs == 'EPSG:28992' else f"ST_Transform(pnd.geom,'EPSG:28992',{crs})"
+    geom_crs = "pnd.geom" if crs == 'EPSG:28992' else f"ST_Transform(pnd.geom,'EPSG:28992','{crs}')"
 
     ## Count how many buildings in the bbox
     total_count_b_in_bbox = db.execute(f"""
@@ -164,7 +215,7 @@ def read_panden_items(
     # Link to next page
     if offset + limit < total_count:
         feature_collection["links"].append({
-            "href": f"/panden/items?minx={minx}&miny={miny}&maxx={maxx}&maxy={maxy}&woonplaats={woonplaats}&postcode_4={postcode_4}&crs={crs}&limit={limit}&offset={offset + limit}",
+            "href": f"{root}/collections/panden/items?minx={minx}&miny={miny}&maxx={maxx}&maxy={maxy}&woonplaats={woonplaats}&postcode_4={postcode_4}&crs={crs}&limit={limit}&offset={offset + limit}",
             "rel": "next",
             "type": "application/geo+json",
             "title": f"Next page of panden (features) in the specified bounding box"
@@ -174,7 +225,7 @@ def read_panden_items(
     if offset > 0:
         prev_offset = max(0, offset - limit)  # ensure that offset is always positive
         feature_collection["links"].append({
-            "href": f"/panden/items?minx={minx}&miny={miny}&maxx={maxx}&maxy={maxy}&woonplaats={woonplaats}&postcode_4={postcode_4}&crs={crs}&limit={limit}&offset={prev_offset}",
+            "href": f"{root}/collections/panden/items?minx={minx}&miny={miny}&maxx={maxx}&maxy={maxy}&woonplaats={woonplaats}&postcode_4={postcode_4}&crs={crs}&limit={limit}&offset={prev_offset}",
             "rel": "previous",
             "type": "application/geo+json",
             "title": f"Previous page of panden (features) in the specified bounding box"
@@ -189,7 +240,7 @@ def read_pandRef(
         pandRef: str,
         crs: str = Query(default='EPSG:28992')
 ):
-    geom_crs = "geom" if crs == 'EPSG:28992' else f"ST_Transform(geom,'EPSG:28992',{crs})"
+    geom_crs = "geom" if crs == 'EPSG:28992' else f"ST_Transform(geom,'EPSG:28992','{crs}')"
 
     db_result = db.execute(f"""
         SELECT identificatie, status, oorspronkelijkBouwjaar, documentdatum, ST_AsGeoJSON({geom_crs}) AS geom
@@ -219,7 +270,7 @@ def read_verblijfsobjecten_items(
         limit: int = Query(50, ge=1, le=1000), # always show at least 1 and no more than 1000
         offset: int = Query(0, ge=0) # ensure that offset is always positive
 ):
-    geom_crs = "geom" if crs == 'EPSG:28992' else f"ST_Transform(geom,'EPSG:28992',{crs})"
+    geom_crs = "geom" if crs == 'EPSG:28992' else f"ST_Transform(geom,'EPSG:28992','{crs}')"
 
     where_statement = f"WHERE pand = '{pandRef}'" if pandRef else ""
 
@@ -280,17 +331,17 @@ def read_verblijfsobjecten_items(
     # Link to next page
     if offset + limit < total_count:
         feature_collection["links"].append({
-            "href": f"/verblijfsobjecten/items?crs={crs}&limit={limit}&offset={offset + limit}",
+            "href": f"{root}/collections/verblijfsobjecten/items?pandRef={pandRef}&crs={crs}&limit={limit}&offset={offset + limit}",
             "rel": "next",
             "type": "application/geo+json",
-            "title": f"Next page of verblijfsobjecten"
+            "title": f"Next page of verblijfsobjecten (features)"
         })
 
     # Link to previous page
     if offset > 0:
         prev_offset = max(0, offset - limit)  # ensure that offset is always positive
         feature_collection["links"].append({
-            "href": f"/verblijfsobjecten/items?crs={crs}&limit={limit}&offset={prev_offset}",
+            "href": f"{root}/collections/verblijfsobjecten/items?pandRef={pandRef}&crs={crs}&limit={limit}&offset={prev_offset}",
             "rel": "previous",
             "type": "application/geo+json",
             "title": f"Previous page of verblijfsobjecten (features)"
@@ -303,7 +354,7 @@ def read_vboRef(
         vboRef: str,
         crs: str = Query(default='EPSG:28992')
 ):
-    geom_crs = "geom" if crs == 'EPSG:28992' else f"ST_Transform(geom,'EPSG:28992',{crs})"
+    geom_crs = "geom" if crs == 'EPSG:28992' else f"ST_Transform(geom,'EPSG:28992','{crs}')"
 
     db_result = db.execute(f"""
         SELECT identificatie, status, gebruiksdoel, documentdatum, oppervlakte, pand, hoofdadres, ST_AsGeoJSON({geom_crs}) AS geom
@@ -317,7 +368,7 @@ def read_vboRef(
     "type": "Feature",
             "geometry": json.loads(geom),
             "properties": {
-                "id": id,
+                "id": identificatie,
                 "status": status,
                 "gebruiksdoel": doel,
                 "documentdatum": doc,
