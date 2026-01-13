@@ -141,7 +141,7 @@ function displayBuilding(feature) {
 // To group the base layers (background) and make the ToC widget
 let baseLayers = {
   "Topographical map": basemap_pdok,
-  "Buildings": buildingLayer
+  "Buildings": buildingsLayer
 };
 let toc = L.control.layers(baseLayers).addTo(map);
 
