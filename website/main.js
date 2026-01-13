@@ -116,7 +116,7 @@ function displayBuilding(feature) {
             fillColor: '#fca5a5',    // Light red fill
             fillOpacity: 0.4         // Semi-transparent
         },
-//        // Handle coordinate conversion if needed
+//        /// Handle coordinate conversion if needed
 //        coordsToLatLng: function(coords) {
 //            // If your API returns RD coordinates, convert them
 //            // Assuming API returns WGS84 (standard GeoJSON)
