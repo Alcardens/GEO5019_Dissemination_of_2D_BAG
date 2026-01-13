@@ -1,18 +1,8 @@
 import json
 from fastapi import FastAPI, Query
 import duckdb
-from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
-
-# Add CORS middleware - THIS IS THE FIX
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],  # Allows all origins (for development)
-    allow_credentials=True,
-    allow_methods=["*"],  # Allows all methods (GET, POST, etc.)
-    allow_headers=["*"],  # Allows all headers
-)
 
 ### Connect to the DuckDB (backend that was set up earlier in this assignment)
 db = duckdb.connect()
