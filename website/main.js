@@ -45,7 +45,7 @@ let buildingsLayer = L.layerGroup().addTo(map);
 // VERSION 1: Load single test building
 async function loadTestBuilding() {
     const testPandId = '0503100000032914';
-    const apiUrl = `http://127.0.0.1:8000/collections/panden/items/${testPandId}`;
+    const apiUrl = `${API_BASE_URL}/collections/panden/items/${testPandId}`;
 
     try {
         console.log('Loading test building from:', apiUrl);
@@ -72,7 +72,7 @@ async function loadTestBuilding() {
 //    const bounds = getVisibleBounds();
 //
 //    // Build API URL with bbox filter
-//    const apiUrl = `http://127.0.0.1:8000/bbox?minx=${bounds.xmin}&miny=${bounds.ymin}&maxx=${bounds.xmax}&maxy=${bounds.ymax}`;
+//    const apiUrl = `${API_BASE_URL}/bbox?minx=${bounds.xmin}&miny=${bounds.ymin}&maxx=${bounds.xmax}&maxy=${bounds.ymax}`;
 //
 //    try {
 //        console.log('Loading buildings in viewport from:', apiUrl);
@@ -116,12 +116,16 @@ function displayBuilding(feature) {
             fillColor: '#fca5a5',    // Light red fill
             fillOpacity: 0.4         // Semi-transparent
         },
-//        /// Handle coordinate conversion if needed
-//        coordsToLatLng: function(coords) {
-//            // If your API returns RD coordinates, convert them
-//            // Assuming API returns WGS84 (standard GeoJSON)
-//            return L.latLng(coords[1], coords[0]);
-//        },
+        // CRITICAL: Convert RD coordinates to lat/lng
+        coordsToLatLng: function(coords) {
+            // coords = [x, y] in RD (EPSG:28992)
+            // Need to convert to [lng, lat] for proj4, then to Leaflet's [lat, lng]
+
+            let wgs84 = proj4('EPSG:28992', 'EPSG:4326', [coords[0], coords[1]]);
+            // wgs84 = [lng, lat]
+
+            return L.latLng(wgs84[1], wgs84[0]); // Leaflet wants [lat, lng]
+        },
         onEachFeature: function(feature, layer) {
             // Add popup with building info
             if (feature.properties) {
@@ -141,8 +145,10 @@ function displayBuilding(feature) {
 
     // Add to buildings layer
     buildingLayer.addTo(buildingsLayer);
-}
 
+    // Zoom to the building (helpful for testing)
+    map.fitBounds(buildingLayer.getBounds());
+}
 
 // Load test building on page load (VERSION 1 - for testing)
 // Comment this out when VERSION 2 is ready
