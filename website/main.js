@@ -477,12 +477,12 @@ async function downloadGeoJSON() {
 
     // Add gemeente filter if provided
     if (gemeente) {
-        baseUrl += `&woonplaats={gemeente}`;
+        baseUrl += `&woonplaats=${encodeURIComponent(gemeente)}`;
         }
 
     // Add postcode filter if provided
     if (postcode) {
-        baseUrl += `&postcode_4==${postcode}`;
+        baseUrl += `&postcode_4=${encodeURIComponent(postcode)}`;
         }
 
     console.log('Starting download from:', baseUrl);
@@ -533,7 +533,7 @@ async function fetchAllPages(baseUrl) {
 
     while (true) {
         // Add limit and offset parameters to URL
-        const pageUrl = `baseUrl&limit=${limit}&offset=${offset}`;
+        const pageUrl = `${baseUrl}&limit=${limit}&offset=${offset}`;
         console.log(`Fetching: offset=${offset}, limit=${limit}...`);
 
         try {
