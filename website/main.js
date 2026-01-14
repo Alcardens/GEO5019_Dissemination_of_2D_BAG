@@ -72,7 +72,7 @@ async function loadBuildingsInView() {
     const bounds = getVisibleBounds();
 
     // Build API URL with bbox filter
-    const apiUrl = `http://127.0.0.1:8000/collections/panden/items?minx=${bounds.xmin}&miny=${bounds.ymin}&maxx=${bounds.xmax}&maxy=${bounds.ymax}`;
+    const apiUrl = `http://127.0.0.1:8000/collections/panden/items?minx=${bounds.xmin}&miny=${bounds.ymin}&maxx=${bounds.xmax}&maxy=${bounds.ymax}&limit=1000`;
 
     try {
         console.log('Loading buildings in viewport from:', apiUrl);
@@ -101,7 +101,7 @@ async function loadBuildingsInView() {
 }
 
 // Function: Display a single building on the map
-function displayBuilding(feature) {
+function displayBuilding(feature, shouldZoom = true) {
     // Check if feature has geometry
     if (!feature.geometry || !feature.geometry.coordinates) {
         console.warn('Building has no geometry:', feature);
@@ -147,7 +147,9 @@ function displayBuilding(feature) {
     buildingLayer.addTo(buildingsLayer);
 
     // Zoom to the building (helpful for testing)
-    map.fitBounds(buildingLayer.getBounds());
+    if (shouldZoom) {
+        map.fitBounds(buildingLayer.getBounds());
+    }
 }
 
 //// Load test building on page load (VERSION 1 - for testing)
