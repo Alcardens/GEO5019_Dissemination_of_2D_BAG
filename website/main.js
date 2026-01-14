@@ -72,7 +72,7 @@ async function loadBuildingsInView() {
     const bounds = getVisibleBounds();
 
     // Build API URL with bbox filter
-    const apiUrl = `http://127.0.0.1:8000/collections/panden/items?minx=${bounds.xmin}&miny=${bounds.ymin}&maxx=${bounds.xmax}&maxy=${bounds.ymax}&limit=1000`;
+    const apiUrl = `http://127.0.0.1:8000/collections/panden/items?minx=${bounds.xmin}&miny=${bounds.ymin}&maxx=${bounds.xmax}&maxy=${bounds.ymax}&limit=100`;
 
     try {
         console.log('Loading buildings in viewport from:', apiUrl);
