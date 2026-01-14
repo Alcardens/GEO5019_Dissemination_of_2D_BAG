@@ -533,7 +533,7 @@ async function fetchAllPages(baseUrl) {
 
     while (true) {
         // Add limit and offset parameters to URL
-        const pageUrl = `{baseUrl}&limit=${limit}&offset=${offset}`;
+        const pageUrl = `baseUrl&limit=${limit}&offset=${offset}`;
         console.log(`Fetching: offset=${offset}, limit=${limit}...`);
 
         try {
