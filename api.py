@@ -14,14 +14,15 @@ app.add_middleware(
     allow_headers=["*"],  # Allows all headers
 )
 
-root = "http://0.0.0.0:8000"
+# Host link
+root = "godzilla.bk.tudelft.nl.bagparquet"
 
-### Connect to the DuckDB
+# Connect to the DuckDB
 db = duckdb.connect()
 db.execute("INSTALL spatial")
 db.execute("LOAD spatial")
 
-### Test if the API is working, with a simple message on the root page
+# Root page
 @app.get("/")
 def read_root():
     return {"title": "BAG API",
@@ -55,6 +56,7 @@ def read_root():
             ]
             }
 
+# Conformance page
 @app.get("/conformance")
 def read_conformance():
     return {"links": [
@@ -70,12 +72,13 @@ def read_conformance():
         ]
             }
 
+# API definition
 @app.get("/api")
 def read_api():
     return {"title": "API definition TBA"
             }
 
-### Collections Endpoint
+# Collections endpoint
 @app.get("/collections")
 def read_collections():
     collection = []
@@ -92,7 +95,7 @@ def read_collections():
         "pand_count": total_count_panden,
         "links": [
             {
-                "href": f"/collections/panden/items",
+                "href": f"{root}/collections/panden/items",
                 "rel": "items",
                 "type": "application/geo+json",
                 "title": f"panden in the Netherlands"
@@ -108,12 +111,12 @@ def read_collections():
     vbo = {
         "id": 'verblijfsobjecten',
         "title": f"verblijfsobjecten in the Netherlands",
-        "description": f"pand footprints for the Netherlands",
+        "description": f"verblijfsobject points for the Netherlands",
         "itemType": "feature",
-        "pand_count": total_count_vbo,
+        "verblijfsobject_count": total_count_vbo,
         "links": [
             {
-                "href": f"/collections/verblijfsobjecten/items",
+                "href": f"{root}/collections/verblijfsobjecten/items",
                 "rel": "items",
                 "type": "application/geo+json",
                 "title": f"panden in the Netherlands"
@@ -122,7 +125,7 @@ def read_collections():
     }
     collection.append(vbo)
 
-    ## Add metadata about limit and offset etc. and navigation links when applicable
+    # Add metadata about limit and offset etc. and navigation links when applicable
     collections = {
         "collections": collection,
         "total_feature_count": 7,
@@ -133,7 +136,7 @@ def read_collections():
 
 @app.get("/collections/panden/items")
 def read_panden_items(
-        minx: float = Query(default=None), # for default bbox values I took the assignment bbox
+        minx: float = Query(default=None),
         miny: float = Query(default=None),
         maxx: float = Query(default=None),
         maxy: float = Query(default=None),
@@ -200,7 +203,7 @@ def read_panden_items(
         }
         features.append(feature)
 
-    ## Build a FeatureCollection from the buildings (Features) in the bbox and add metadata
+    # Build a FeatureCollection from the buildings (Features) in the bbox and add metadata
     feature_collection = {
         "type": "FeatureCollection",
         "features": features,
@@ -211,7 +214,7 @@ def read_panden_items(
         "links": []
     }
 
-    ## When applicable, add links to the previous and next page (pagination)
+    # When applicable, add links to the previous and next page (pagination)
     # Link to next page
     if offset + limit < total_count:
         feature_collection["links"].append({
@@ -234,7 +237,7 @@ def read_panden_items(
     return feature_collection
 
 
-### Municipality-based Endpoints - building_id
+# Panden endpoint
 @app.get("/collections/panden/items/{pandRef}")
 def read_pandRef(
         pandRef: str,
@@ -316,7 +319,7 @@ def read_verblijfsobjecten_items(
         }
         features.append(feature)
 
-    ## Build a FeatureCollection from the buildings (Features) in the bbox and add metadata
+    # Build a FeatureCollection from the vbo (Features) in the bbox and add metadata
     feature_collection = {
         "type": "FeatureCollection",
         "features": features,
@@ -327,7 +330,7 @@ def read_verblijfsobjecten_items(
         "links": []
     }
 
-    ## When applicable, add links to the previous and next page (pagination)
+    # When applicable, add links to the previous and next page (pagination)
     # Link to next page
     if offset + limit < total_count:
         feature_collection["links"].append({
