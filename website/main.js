@@ -42,40 +42,13 @@ let toc = L.control.layers(baseLayers).addTo(map);
 // Layer to hold building geometries
 let buildingsLayer = L.layerGroup().addTo(map);
 
-// VERSION 1: Load single test building
-async function loadTestBuilding() {
-    const testPandId = '0503100000032914';
-    const apiUrl = `http://127.0.0.1:8000/collections/panden/items/${testPandId}`;
-
-    try {
-        console.log('Loading test building from:', apiUrl);
-        const response = await fetch(apiUrl);
-
-        if (!response.ok) {
-            throw new Error(`API error: ${response.status}`);
-        }
-
-        const data = await response.json();
-        console.log('Test building data:', data);
-
-        // Add the building to the map
-        displayBuilding(data);
-
-    } catch (error) {
-        console.error('Failed to load test building:', error);
-    }
-}
-
-//// VERSION 2: Load buildings in visible viewport
-//async function loadBuildingsInView() {
-//    // Get visible map bounds
-//    const bounds = getVisibleBounds();
-//
-//    // Build API URL with bbox filter
-//    const apiUrl = `http://127.0.0.1:8000/collections/panden/items?minx=${bounds.xmin}&miny=${bounds.ymin}&maxx=${bounds.xmax}&maxy=${bounds.ymax}`;
+//// VERSION 1: Load single test building
+//async function loadTestBuilding() {
+//    const testPandId = '0503100000032914';
+//    const apiUrl = `http://127.0.0.1:8000/collections/panden/items/${testPandId}`;
 //
 //    try {
-//        console.log('Loading buildings in viewport from:', apiUrl);
+//        console.log('Loading test building from:', apiUrl);
 //        const response = await fetch(apiUrl);
 //
 //        if (!response.ok) {
@@ -83,22 +56,49 @@ async function loadTestBuilding() {
 //        }
 //
 //        const data = await response.json();
-//        console.log(`Loaded ${data.features ? data.features.length : 0} buildings`);
+//        console.log('Test building data:', data);
 //
-//        // Clear existing buildings
-//        buildingsLayer.clearLayers();
-//
-//        // Add each building to the map
-//        if (data.features && data.features.length > 0) {
-//            data.features.forEach(feature => {
-//                displayBuilding(feature);
-//            });
-//        }
+//        // Add the building to the map
+//        displayBuilding(data);
 //
 //    } catch (error) {
-//        console.error('Failed to load buildings in viewport:', error);
+//        console.error('Failed to load test building:', error);
 //    }
 //}
+
+// VERSION 2: Load buildings in visible viewport
+async function loadBuildingsInView() {
+    // Get visible map bounds
+    const bounds = getVisibleBounds();
+
+    // Build API URL with bbox filter
+    const apiUrl = `http://127.0.0.1:8000/collections/panden/items?minx=${bounds.xmin}&miny=${bounds.ymin}&maxx=${bounds.xmax}&maxy=${bounds.ymax}`;
+
+    try {
+        console.log('Loading buildings in viewport from:', apiUrl);
+        const response = await fetch(apiUrl);
+
+        if (!response.ok) {
+            throw new Error(`API error: ${response.status}`);
+        }
+
+        const data = await response.json();
+        console.log(`Loaded ${data.features ? data.features.length : 0} buildings`);
+
+        // Clear existing buildings
+        buildingsLayer.clearLayers();
+
+        // Add each building to the map
+        if (data.features && data.features.length > 0) {
+            data.features.forEach(feature => {
+                displayBuilding(feature);
+            });
+        }
+
+    } catch (error) {
+        console.error('Failed to load buildings in viewport:', error);
+    }
+}
 
 // Function: Display a single building on the map
 function displayBuilding(feature) {
@@ -150,17 +150,17 @@ function displayBuilding(feature) {
     map.fitBounds(buildingLayer.getBounds());
 }
 
-// Load test building on page load (VERSION 1 - for testing)
-// Comment this out when VERSION 2 is ready
-loadTestBuilding();
+//// Load test building on page load (VERSION 1 - for testing)
+//// Comment this out when VERSION 2 is ready
+//loadTestBuilding();
 
 // VERSION 2: Load buildings when map moves/zooms
 // Uncomment these lines when your bbox API endpoint is ready:
-/*
+
 map.on('moveend', loadBuildingsInView);  // Reload when map stops moving
 map.on('zoomend', loadBuildingsInView);  // Reload when zoom changes
 loadBuildingsInView();  // Initial load
-*/
+
 
 
 // Register a geocoder to the map app
@@ -412,17 +412,6 @@ async function downloadGeoJSON() {
     let gemeente = document.getElementById('gemeente-input').value.trim();
     let postcode = document.getElementById('postcode-input').value.trim();
     let bboxInput = document.getElementById('bbox-display').value.trim();
-
-//    // Determine which bbox to use
-//    let bbox;
-//    if (bboxInput) {
-//        // Use the drawn bounding box
-//        bbox = currentBboxCoords;
-//    } else {
-//        // Use visible map area as default
-//        bbox = getVisibleBounds();
-//        console.log('No filters specified, using visible map area');
-//    }
 
 
     // Build base API URL
