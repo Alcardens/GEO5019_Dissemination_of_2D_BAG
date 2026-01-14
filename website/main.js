@@ -427,7 +427,7 @@ async function downloadGeoJSON() {
 
     // Build base API URL
     let baseUrl = `http://127.0.0.1:8000/collections/panden/items?`;
-    let hasFilters = False;
+    let hasFilters = false;
 
     // Add gemeente filter if provided
     if (gemeente) {
