@@ -71,7 +71,7 @@ async function loadBuildingsInView() {
     const bounds = getVisibleBounds();
 
     // Build API URL with bbox filter
-    const apiUrl = `https://godzilla.bk.tudelft.nl/2dbagparquet/api/collections/panden/items?minx=${bounds.xmin}&miny=${bounds.ymin}&maxx=${bounds.xmax}&maxy=${bounds.ymax}&limit=100`;
+    const apiUrl = `https://godzilla.bk.tudelft.nl/2dbagparquet/api/collections/panden/items?minx=${bounds.xmin}&miny=${bounds.ymin}&maxx=${bounds.xmax}&maxy=${bounds.ymax}&limit=200`;
 
     try {
         console.log('Loading buildings in viewport from:', apiUrl);
