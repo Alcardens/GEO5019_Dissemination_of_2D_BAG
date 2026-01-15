@@ -452,6 +452,9 @@ function getVisibleBounds() {
 
 // Function: Download GeoJSON with filters
 async function downloadGeoJSON() {
+    // Get selected data type from radio buttons
+    let dataType = document.querySelector('input[name="data-type"]:checked').value;
+
     // Get filter values
     let gemeente = document.getElementById('gemeente-input').value.trim();
     let postcode = document.getElementById('postcode-input').value.trim();
@@ -459,7 +462,7 @@ async function downloadGeoJSON() {
 
 
     // Build base API URL
-    let baseUrl = `http://127.0.0.1:8000/collections/panden/items?`;
+    let baseUrl = `http://127.0.0.1:8000/collections/${dataType}/items?`;
     let hasFilters = false;
 
     // Add gemeente filter if provided
@@ -507,7 +510,7 @@ async function downloadGeoJSON() {
         const url = URL.createObjectURL(blob);
         const link = document.createElement('a');
         link.href = url;
-        link.download = 'bag_data.geojson';
+        link.download = 'bag_${dataType}.geojson';
 
         // Trigger download
         document.body.appendChild(link);
@@ -516,11 +519,11 @@ async function downloadGeoJSON() {
         URL.revokeObjectURL(url);
 
         console.log('Download complete!');
-        alert(`Successfully downloaded ${allFeatures.length} buildings!`);
+        alert(`Successfully downloaded ${allFeatures.length} ${dataType}!`);
 
     } catch (error) {
         console.error('Download failed:', error);
-        alert(`Download failed: ${error.message}\n\nMake sure your API is running on http://127.0.0.1:8000/collections/panden/items`);
+        alert(`Download failed: ${error.message}\n\nMake sure your API is running on http://127.0.0.1:8000/collections/${dataType}/items`);
         }
 }
 
