@@ -158,6 +158,7 @@ function displayBuilding(feature) {
 // VERSION 2: Load buildings when map moves/zooms
 // Uncomment these lines when your bbox API endpoint is ready:
 
+// Add a delay to reloading the buildings after moving to make it work more smoothly (less fetches)
 function debounce(fn, delay) {
     let timeout;
     return function (...args) {
@@ -169,10 +170,35 @@ function debounce(fn, delay) {
 const debouncedLoadBuildings = debounce(loadBuildingsInView, 300);
 
 
-loadBuildingsInView();  // Initial load
-map.on('moveend', debouncedLoadBuildings);
+//loadBuildingsInView();  // Initial load
+//map.on('moveend', debouncedLoadBuildings);
 //map.on('moveend', loadBuildingsInView);  // Reload when map stops moving
 //map.on('zoomend', loadBuildingsInView);  // Reload when zoom changes
+
+// Only load building visualisation when layer is turned on
+map.on('overlayadd', function (e) {
+    if (e.layer === buildingsLayer) {
+        console.log('Buildings layer turned ON');
+        loadBuildingsInView();
+
+        // Start listening to map movement
+        map.on('moveend', debouncedLoadBuildings);
+    }
+});
+
+// Don't load buildings/remove buildings loaded when layer is turned off
+map.on('overlayremove', function (e) {
+    if (e.layer === buildingsLayer) {
+        console.log('Buildings layer turned OFF');
+
+        // Stop listening
+        map.off('moveend', debouncedLoadBuildings);
+
+        // Optional: clear buildings from map
+        buildingsLayer.clearLayers();
+    }
+});
+
 
 // Add a menu with overlay checkboxes for the building visualisation
 let overlays = {
