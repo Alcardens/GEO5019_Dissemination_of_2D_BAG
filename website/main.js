@@ -478,7 +478,7 @@ async function downloadGeoJSON() {
         }
 
     if (currentBboxCoords) {
-        baseUrl += (hasFilters ? '&' : '') + `minx=${bbox.xmin}&miny=${bbox.ymin}&maxx=${bbox.xmax}&maxy=${bbox.ymax}`;
+        baseUrl += (hasFilters ? '&' : '') + `minx=${currentBboxCoords.xmin}&miny=${currentBboxCoords.ymin}&maxx=${currentBboxCoords.xmax}&maxy=${currentBboxCoords.ymax}`;
         hasFilters = true;
     }
 
