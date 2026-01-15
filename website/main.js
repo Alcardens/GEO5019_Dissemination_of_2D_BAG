@@ -34,7 +34,6 @@ basemap_pdok.addTo(map);
 let baseLayers = {
   "Topographical map": basemap_pdok
 };
-let toc = L.control.layers(baseLayers).addTo(map);
 
 
 // ===== BUILDING VISUALISATION =====
@@ -175,8 +174,12 @@ map.on('moveend', debouncedLoadBuildings);
 //map.on('moveend', loadBuildingsInView);  // Reload when map stops moving
 //map.on('zoomend', loadBuildingsInView);  // Reload when zoom changes
 
+// Add a menu with overlay checkboxes for the building visualisation
+let overlays = {
+    "Buildings": buildingsLayer
+};
 
-
+let toc = L.control.layers(baseLayers, overlays).addTo(map);
 
 // Register a geocoder to the map app
 register_geocoder = function (mapInstance) {
