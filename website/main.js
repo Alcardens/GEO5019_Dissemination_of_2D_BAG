@@ -451,10 +451,7 @@ function getVisibleBounds() {
 }
 
 // Function: Download GeoJSON with filters
-async function downloadGeoJSON() {
-    // Get selected data type from radio buttons
-    let dataType = document.querySelector('input[name="data-type"]:checked').value;
-
+async function downloadPandenGeoJSON() {
     // Get filter values
     let gemeente = document.getElementById('gemeente-input').value.trim();
     let postcode = document.getElementById('postcode-input').value.trim();
@@ -462,7 +459,7 @@ async function downloadGeoJSON() {
 
 
     // Build base API URL
-    let baseUrl = `http://127.0.0.1:8000/collections/${dataType}/items?`;
+    let baseUrl = `http://127.0.0.1:8000/collections/panden/items?`;
     let hasFilters = false;
 
     // Add gemeente filter if provided
@@ -510,7 +507,7 @@ async function downloadGeoJSON() {
         const url = URL.createObjectURL(blob);
         const link = document.createElement('a');
         link.href = url;
-        link.download = `bag_${dataType}.geojson`;
+        link.download = 'bag_panden.geojson';
 
         // Trigger download
         document.body.appendChild(link);
@@ -519,13 +516,41 @@ async function downloadGeoJSON() {
         URL.revokeObjectURL(url);
 
         console.log('Download complete!');
-        alert(`Successfully downloaded ${allFeatures.length} ${dataType}!`);
+        alert(`Successfully downloaded ${allFeatures.length} buildings!`);
 
     } catch (error) {
         console.error('Download failed:', error);
-        alert(`Download failed: ${error.message}\n\nMake sure your API is running on http://127.0.0.1:8000/collections/${dataType}/items`);
+        alert(`Download failed: ${error.message}\n\nMake sure your API is running on http://127.0.0.1:8000/collections/panden/items`);
         }
 }
+
+
+async function downloadVboGeoJSON() {
+    // 1. Get pand ID from input
+    let pandId = document.getElementById('pand-id-input').value.trim();
+
+    // 2. Validate - MUST have pand ID
+    if (!pandId) {
+        alert('Please enter a Pand ID to download verblijfsobjecten');
+        return;  // STOPS if no pand ID provided
+    }
+
+    // 3. Build API URL with pand parameter
+    let baseUrl = `http://127.0.0.1:8000/collections/verblijfsobjecten/items?pandRef=${encodeURIComponent(pandId)}`;
+
+    // 4. Fetch all pages (same pagination logic)
+    const allFeatures = await fetchAllPages(baseUrl);
+
+    // 5. Check if any verblijfsobjecten found
+    if (allFeatures.length === 0) {
+        alert(`No verblijfsobjecten found for Pand ID: ${pandId}`);
+        return;
+    }
+
+    // 6. Download with filename including pand ID
+    link.download = `bag_vbo_${pandId}.geojson`;
+}
+
 
 // Function: Fetch all pages from paginated API
 async function fetchAllPages(baseUrl) {

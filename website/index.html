@@ -264,7 +264,7 @@
         <!-- HEADER SECTION -->
         <div class="header">
             <h1>🏢 BAG Viewer and Downloader</h1>
-            <p>Interactive viewer for Dutch Building and Address data (BAG) - WIP 37</p>
+            <p>Interactive viewer for Dutch Building and Address data (BAG) - WIP 38</p>
         </div>
 
         <div id="map-canvas">
@@ -314,51 +314,50 @@
             <div id="download-panel-content" class="panel-content">
                 <h3>💾 Download Data</h3>
 
-                <!-- Radio button to select panden or verblijfsobjecten -->
-                <div class="filter-section">
-                    <label class="filter-label">Data Type</label>
-                    <div>
-                        <label>
-                            <input type="radio" name="data-type" value="panden" checked>
-                            <span>Panden</span>
-                        </label>
-                        <label>
-                            <input type="radio" name="data-type" value="verblijfsobjecten">
-                            <span>Verblijfsobjecten</span>
-                        </label>
+                <div style="border-bottom: 2px solid #e5e7eb; padding-bottom: 1rem; margin-bottom: 1rem;">
+                    <h4>Download Panden (Buildings)</h4>
+
+                    <!-- Filter by Gemeente -->
+                    <div class="filter-section">
+                        <label class="filter-label">Filter by Gemeente (optional)</label>
+                        <input type="text" id="gemeente-input" class="input-field" placeholder="e.g., Delft" />
+                        <div class="filter-hint">Leave empty to skip this filter</div>
                     </div>
+
+                    <!-- Filter by Postcode -->
+                    <div class="filter-section">
+                        <label class="filter-label">Filter by Postcode numbers (optional)</label>
+                        <input type="text" id="postcode-input" class="input-field" placeholder="e.g., 2628" />
+                        <div class="filter-hint">Leave empty to skip this filter</div>
+                    </div>
+
+                    <!-- Filter by Bounding Box -->
+                    <div class="filter-section">
+                        <label class="filter-label">Filter by Bounding Box (optional)</label>
+                        <button class="btn btn-secondary" onclick="useBboxForDownload()">
+                            Use Drawn Bounding Box
+                        </button>
+                        <input type="text" id="bbox-display" class="input-field" placeholder="No bbox selected" disabled />
+                        <div class="filter-hint">Draw a bbox above or leave empty for visible area</div>
+                    </div>
+
+                    <!-- Download Button -->
+                    <button onclick="downloadPandenGeoJSON()">
+                            Download Panden GeoJSON
+                        </button>
+                    <p class="info-text">If no filters are used, downloads data from visible map area</p>
                 </div>
 
-                <!-- Filter by Gemeente -->
-                <div class="filter-section">
-                    <label class="filter-label">Filter by Gemeente (optional)</label>
-                    <input type="text" id="gemeente-input" class="input-field" placeholder="e.g., Delft" />
-                    <div class="filter-hint">Leave empty to skip this filter</div>
-                </div>
+                <div>
+                    <h4>Download Verblijfsobjecten</h4>
 
-                <!-- Filter by Postcode -->
-                <div class="filter-section">
-                    <label class="filter-label">Filter by Postcode numbers (optional)</label>
-                    <input type="text" id="postcode-input" class="input-field" placeholder="e.g., 2628" />
-                    <div class="filter-hint">Leave empty to skip this filter</div>
-                </div>
+                    <!-- Pand ID Input -->
+                    <input type="text" id="pand-id-input" placeholder="e.g., 0503100000032914" />
 
-                <!-- Filter by Bounding Box -->
-                <div class="filter-section">
-                    <label class="filter-label">Filter by Bounding Box (optional)</label>
-                    <button class="btn btn-secondary" onclick="useBboxForDownload()">
-                        Use Drawn Bounding Box
+                    <button onclick="downloadVboGeoJSON()">
+                        Download Verblijfsobjecten GeoJSON
                     </button>
-                    <input type="text" id="bbox-display" class="input-field" placeholder="No bbox selected" disabled />
-                    <div class="filter-hint">Draw a bbox above or leave empty for visible area</div>
                 </div>
-
-                <!-- Download Button -->
-                <button class="btn btn-primary" onclick="downloadGeoJSON()">
-                    Download GeoJSON
-                </button>
-
-                <p class="info-text">If no filters are used, downloads data from visible map area</p>
             </div>
         </div>
 
