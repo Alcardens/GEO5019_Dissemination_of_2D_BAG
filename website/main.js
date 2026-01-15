@@ -548,7 +548,45 @@ async function downloadVboGeoJSON() {
     }
 
     // 6. Download with filename including pand ID
-    link.download = `bag_vbo_${pandId}.geojson`;
+    //link.download = `bag_vbo_${pandId}.geojson`;
+
+    console.log('Starting download from:', baseUrl);
+
+    try {
+        // Fetch ALL pages of data
+        const allFeatures = await fetchAllPages(baseUrl);
+
+        console.log(`Downloaded ${allFeatures.length} features total`);
+
+        // Create GeoJSON FeatureCollection
+        const geojson = {
+            type: "FeatureCollection",
+            features: allFeatures
+        };
+
+        // Convert to string
+        const geojsonString = JSON.stringify(geojson, null, 2);
+
+        // Create download link
+        const blob = new Blob([geojsonString], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `bag_vbo_${pandId}.geojson`;
+
+        // Trigger download
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+
+        console.log('Download complete!');
+        alert(`Successfully downloaded ${allFeatures.length} buildings!`);
+
+    } catch (error) {
+        console.error('Download failed:', error);
+        alert(`Download failed: ${error.message}\n\nMake sure your API is running on http://127.0.0.1:8000/collections/verblijfsobjecten/items`);
+        }
 }
 
 
