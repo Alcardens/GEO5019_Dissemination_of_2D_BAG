@@ -1,3 +1,5 @@
+//-- Cleaned up and adapted code written mostly by Claude.ai
+
 // ===== CONFIGURATION =====
 const API_BASE_URL = 'https://godzilla.bk.tudelft.nl/2dbagparquet/api';
 const PND_PMTILES_URL = 'data/bag.pmtiles'; //should be pnd.pmtiles (bag just for testing)
