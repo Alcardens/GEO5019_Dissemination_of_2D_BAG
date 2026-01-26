@@ -30,10 +30,13 @@ basemap_pdok.getAttribution = function () {
 }
 basemap_pdok.addTo(map);
 
+let munic = protomapsL.leafletLayer({url:'data/bag.pmtiles'})
+munic.addTo(map)
 
 // To group the base layers (background) and make the ToC widget
 let baseLayers = {
-  "Topographical map": basemap_pdok
+  "Topographical map": basemap_pdok,
+  "Municiapilities": munic
 };
 
 
@@ -203,13 +206,9 @@ map.on('overlayremove', function (e) {
 });
 
 
-let munic = protomapsL.leafletLayer({url:'data/bag.pmtiles'})
-munic.addTo(map)
-
 // Add a menu with overlay checkboxes for the building visualisation
 let overlays = {
-    "Buildings": buildingsLayer,
-    "Municiapilities": munic
+    "Buildings": buildingsLayer
 };
 
 let toc = L.control.layers(baseLayers, overlays).addTo(map);
