@@ -47,7 +47,7 @@ const pandenLayer = protomapsL.leafletLayer({
       .setContent(html)
       .openOn(map);
   }
-});
+}).addTo(map);
 
 // Layer toggling
 const baseLayers = {
