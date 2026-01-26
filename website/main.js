@@ -31,9 +31,12 @@ L.DomEvent.disableClickPropagation(
 //basemap_pdok.addTo(map);
 
 // OSM baselayer
-let basemap_osm = new L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                            maxZoom: 19,
-                            attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'};
+let options = { maxZoom: 19, attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>' }
+let basemap_osm = new L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', options);
+
+basemap_osm.getAttribution = function () {
+    return 'OSM Background Map <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+}
 
 basemap_osm.addTo(map);
 
