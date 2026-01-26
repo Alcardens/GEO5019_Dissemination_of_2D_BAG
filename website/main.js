@@ -23,7 +23,7 @@ L.DomEvent.disableClickPropagation(
 
 // BRT - (Base Registry Topography) BaseMap PDOK:
 let options = { maxZoom: 14, attribution: 'Map data: <a href="http://www.pdok.nl">BRT Achtergrondkaart</a>' }
-let basemap_pdok = new L.tileLayer('https://service.pdok.nl/brt/achtergrondkaart/wmts/v2_0/standaard/EPSG:3857/{z}/{x}/{y}.png', options);
+let basemap_pdok = new L.tileLayer('https://service.pdok.nl/brt/achtergrondkaart/wmts/v2_0/standaard/EPSG:4326/{z}/{x}/{y}.png', options);
 
 basemap_pdok.getAttribution = function () {
   return 'BRT Background Map <a href="http://www.kadaster.nl">Kadaster</a>.';
@@ -206,8 +206,8 @@ map.on('overlayremove', function (e) {
 // Add PMTiles layer
 //let munic = protomapsL.leafletLayer({url:'data/bag.pmtiles'})
 
-let munic = protomapsL.leafletLayer({
-  url: 'data/municipalities.pmtiles',
+let panden_vis = protomapsL.leafletLayer({
+  url: 'data/pnd.pmtiles',
   paint_rules: [
     {
       dataLayer: 'naam', // MUST match layer name in PMTiles
@@ -221,12 +221,12 @@ let munic = protomapsL.leafletLayer({
   ]
 });
 
-munic.addTo(map)
+panden_vis.addTo(map)
 
 // Add a menu with overlay checkboxes for the building visualisation
 let overlays = {
     "Buildings": buildingsLayer,
-    "Municiapilities": munic
+    "Panden": panden_vis
 };
 
 let toc = L.control.layers(baseLayers, overlays).addTo(map);
