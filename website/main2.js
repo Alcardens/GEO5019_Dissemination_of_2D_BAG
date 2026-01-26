@@ -19,7 +19,7 @@ const base = protomapsL.leafletLayer({
 const pandenLayer = protomapsL.leafletLayer({
   url: 'http://127.0.0.1:8000/static/pnd.pmtiles',
 
-  paint_rules: [
+  paintRules: [
     {
       dataLayer: 'pnd',
       symbolizer: new protomapsL.PolygonSymbolizer({
