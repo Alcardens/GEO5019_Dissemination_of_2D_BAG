@@ -1,5 +1,7 @@
 import duckdb as db
 import time
+from GML_to_WKT import gml_to_wkt
+from duckdb.sqltypes import VARCHAR, BLOB
 
 def xml_to_db(XML_PATH):
     con.sql(f"""
@@ -17,7 +19,12 @@ def xml_to_db(XML_PATH):
         xml_extract_text(mun_xml, '//Objecten:naam')[1] AS naam,
         xml_extract_text(mun_xml, '//Objecten:status')[1] AS status,
         TRY_CAST(xml_extract_text(mun_xml, '//Objecten:documentdatum')[1] AS DATE) AS documentdatum,
-        TRY_CAST(xml_extract_text(mun_xml, '//gml:Polygon/gml:exterior/gml:LinearRing/gml:posList')[1] AS VARCHAR) AS poslist
+        CAST(
+          xml_extract_elements(
+            mun_xml,
+            '(//Objecten:geometrie/Objecten:vlak/gml:Polygon | //Objecten:geometrie/Objecten:multivlak/gml:MultiSurface)[1]'
+          )[1] AS VARCHAR
+        ) AS geom_text
       FROM muns_xml
       WHERE xml_extract_text(mun_xml, '//Historie:eindGeldigheid')[1] IS NULL
     )
@@ -26,24 +33,14 @@ def xml_to_db(XML_PATH):
       naam,
       status,
       documentdatum,
-      ST_GeomFromText(
-          'POLYGON((' ||
-          array_to_string(
-            list_transform(
-              range(1, len(nums), 2),
-              i -> list_extract(nums, i) || ' ' || list_extract(nums, i + 1)
-            ),
-            ', '
-          ) ||
-          '))'
-        ) AS geom
+      ST_GeomFromWkb(gml_to_wkt(geom_text)) AS geom
     FROM (
       SELECT
         identificatie,
         naam,
         status,
         documentdatum,
-        list_filter(str_split(poslist, ' '), x -> x <> '') AS nums
+        geom_text
       FROM extracted
     ) t
     """)
@@ -54,6 +51,7 @@ if __name__ == "__main__":
     con.load_extension("spatial")
     con.execute("INSTALL webbed FROM community")
     con.load_extension("webbed")
+    con.create_function("gml_to_wkt", gml_to_wkt, [VARCHAR], BLOB)
 
     XML_PATH = 'mun\*.xml'
     TABLE = "municipalities"
