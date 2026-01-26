@@ -1,6 +1,7 @@
 // ===== CONFIGURATION =====
 const API_BASE_URL = 'http://127.0.0.1:8000';
-const PMTILES_URL = 'data/pnd.pmtiles';
+const PND_PMTILES_URL = 'data/bag.pmtiles'; //should be pnd.pmtiles (bag just for testing)
+const NL_PMTILES_URL = 'data/bag.pmtiles'; //should be nl.pmtiles
 
 // ===== MAP SETUP (WEB MERCATOR / EPSG:3857) =====
 
@@ -15,9 +16,9 @@ map.attributionControl.setPrefix('');
 // ===== PROTOMAPS BASEMAP (WHITE STYLE) =====
 
 const protomapsBasemap = protomapsL.leafletLayer({
-    url: 'https://api.protomaps.com/tiles/v3.json?key=41392fb7515533a5',
+    url: NL_PMTILES_URL,
     // For a white/light basemap style
-    theme: 'light'
+    theme: 'greyscale'
 });
 protomapsBasemap.addTo(map);
 
@@ -27,7 +28,7 @@ let protocol = new pmtiles.Protocol();
 L.setProtocol(protocol);
 
 const buildingsLayer = protomapsL.leafletLayer({
-    url: PMTILES_URL,
+    url: PND_PMTILES_URL,
     paint_rules: [
         {
             dataLayer: 'naam',  // MUST match layer name in your PMTiles
