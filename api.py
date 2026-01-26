@@ -1,5 +1,6 @@
 import json
 from fastapi import FastAPI, Query
+from fastapi.staticfiles import StaticFiles
 import duckdb
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -13,6 +14,8 @@ app.add_middleware(
     allow_methods=["*"],  # Allows all methods (GET, POST, etc.)
     allow_headers=["*"],  # Allows all headers
 )
+
+app.mount("/static", StaticFiles(directory="website/data"), name="static")
 
 # Host link
 root = "godzilla.bk.tudelft.nl.bagparquet"

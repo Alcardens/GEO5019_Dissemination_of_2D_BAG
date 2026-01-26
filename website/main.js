@@ -220,10 +220,10 @@ map.on('overlayremove', function (e) {
 //let munic = protomapsL.leafletLayer({url:'data/bag.pmtiles'})
 
 let panden_vis = protomapsL.leafletLayer({
-  url: 'data/bag.pmtiles',
+  url: 'http://127.0.0.1/static/bag.pmtiles',
   paint_rules: [
     {
-      dataLayer: 'naam', // MUST match layer name in PMTiles
+      dataLayer: 'municipalities', // MUST match layer name in PMTiles
       symbolizer: new protomapsL.PolygonSymbolizer({
         fill: '#60a5fa',
         opacity: 0.4,
