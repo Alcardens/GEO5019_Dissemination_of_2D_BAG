@@ -87,7 +87,7 @@ async function loadBuildingsInView() {
     const bounds = getVisibleBounds();
 
     // Build API URL with bbox filter
-    const apiUrl = `https://godzilla.bk.tudelft.nl/2dbagparquet/api/collections/panden/items?minx=${bounds.xmin}&miny=${bounds.ymin}&maxx=${bounds.xmax}&maxy=${bounds.ymax}&limit=200`;
+    const apiUrl = `https://godzilla.bk.tudelft.nl/2dbagparquet/api/collections/panden/items?minx=${bounds.xmin}&miny=${bounds.ymin}&maxx=${bounds.xmax}&maxy=${bounds.ymax}&crs=EPSG:3857&limit=200`;
     //const apiUrl = `http://127.0.0.1:8000/collections/panden/items?minx=${bounds.xmin}&miny=${bounds.ymin}&maxx=${bounds.xmax}&maxy=${bounds.ymax}&limit=200`;
 
     try {
