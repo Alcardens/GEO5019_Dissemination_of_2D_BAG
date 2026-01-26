@@ -11,7 +11,7 @@ map.attributionControl.setPrefix('');
 
 // Protomap basemap PMTiles
 const base = protomapsL.leafletLayer({
-  url: 'http://127.0.0.1/static/pnd.pmtiles', // white protomap basemap
+  url: 'http://127.0.0.1:8000/static/pnd.pmtiles', // white protomap basemap
   theme: 'light'
 }).addTo(map);
 
