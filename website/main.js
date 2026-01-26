@@ -22,19 +22,24 @@ L.DomEvent.disableClickPropagation(
 );
 
 // BRT - (Base Registry Topography) BaseMap PDOK:
-let options = { maxZoom: 14, attribution: 'Map data: <a href="http://www.pdok.nl">BRT Achtergrondkaart</a>' }
-let basemap_pdok = new L.tileLayer('https://service.pdok.nl/brt/achtergrondkaart/wmts/v2_0/standaard/EPSG:4326/{z}/{x}/{y}.png', options);
+//let options = { maxZoom: 14, attribution: 'Map data: <a href="http://www.pdok.nl">BRT Achtergrondkaart</a>' }
+//let basemap_pdok = new L.tileLayer('https://service.pdok.nl/brt/achtergrondkaart/wmts/v2_0/standaard/EPSG:4326/{z}/{x}/{y}.png', options);
+//
+//basemap_pdok.getAttribution = function () {
+//  return 'BRT Background Map <a href="http://www.kadaster.nl">Kadaster</a>.';
+//}
+//basemap_pdok.addTo(map);
 
-basemap_pdok.getAttribution = function () {
-  return 'BRT Background Map <a href="http://www.kadaster.nl">Kadaster</a>.';
-}
-basemap_pdok.addTo(map);
+// OSM baselayer
+let basemap_osm = new L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                            maxZoom: 19,
+                            attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'};
 
-
+basemap_osm.addTo(map);
 
 // To group the base layers (background) and make the ToC widget
 let baseLayers = {
-  "Topographical map": basemap_pdok
+  "Topographical map": basemap_osm
 };
 
 
