@@ -39,15 +39,15 @@ basemap_osm.getAttribution = function () {
 }
 basemap_osm.addTo(map);
 
-import { PMTiles, leafletRasterLayer } from "pmtiles";
-const p = new PMTiles('example.pmtiles')
-leafletRasterLayer(p,{attribution:'© <a href="https://openstreetmap.org/copyright">OpenStreetMap</a>'}).addTo(map)
+//import { PMTiles, leafletRasterLayer } from "pmtiles";
+//const p = new PMTiles('example.pmtiles')
+//leafletRasterLayer(p,{attribution:'© <a href="https://openstreetmap.org/copyright">OpenStreetMap</a>'}).addTo(map)
 
 
 // To group the base layers (background) and make the ToC widget
 let baseLayers = {
-  "Topographical map": basemap_osm,
-  "PMTiles": p
+  "Topographical map": basemap_osm
+//  "PMTiles": p
 };
 
 
