@@ -37,8 +37,12 @@ let basemap_osm = new L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.pn
 basemap_osm.getAttribution = function () {
     return 'OSM Background Map <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
 }
-
 basemap_osm.addTo(map);
+
+import { PMTiles, leafletRasterLayer } from "pmtiles";
+const p = new PMTiles('example.pmtiles')
+leafletRasterLayer(p,{attribution:'© <a href="https://openstreetmap.org/copyright">OpenStreetMap</a>'}).addTo(map)
+
 
 // To group the base layers (background) and make the ToC widget
 let baseLayers = {
