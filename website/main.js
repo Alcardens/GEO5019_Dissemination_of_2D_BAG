@@ -30,30 +30,11 @@ basemap_pdok.getAttribution = function () {
 }
 basemap_pdok.addTo(map);
 
-// Add PMTiles layer
-//let munic = protomapsL.leafletLayer({url:'data/bag.pmtiles'})
 
-let munic = protomapsL.leafletLayer({
-  url: 'data/municipalities.pmtiles',
-  paint_rules: [
-    {
-      dataLayer: 'naam', // MUST match layer name in PMTiles
-      symbolizer: new protomapsL.PolygonSymbolizer({
-        fill: '#60a5fa',
-        opacity: 0.4,
-        stroke: '#1e3a8a',
-        width: 1
-      })
-    }
-  ]
-});
-
-munic.addTo(map)
 
 // To group the base layers (background) and make the ToC widget
 let baseLayers = {
-  "Topographical map": basemap_pdok,
-  "Municiapilities": munic
+  "Topographical map": basemap_pdok
 };
 
 
@@ -222,10 +203,30 @@ map.on('overlayremove', function (e) {
     }
 });
 
+// Add PMTiles layer
+//let munic = protomapsL.leafletLayer({url:'data/bag.pmtiles'})
+
+let munic = protomapsL.leafletLayer({
+  url: 'data/municipalities.pmtiles',
+  paint_rules: [
+    {
+      dataLayer: 'naam', // MUST match layer name in PMTiles
+      symbolizer: new protomapsL.PolygonSymbolizer({
+        fill: '#60a5fa',
+        opacity: 0.4,
+        stroke: '#1e3a8a',
+        width: 1
+      })
+    }
+  ]
+});
+
+munic.addTo(map)
 
 // Add a menu with overlay checkboxes for the building visualisation
 let overlays = {
-    "Buildings": buildingsLayer
+    "Buildings": buildingsLayer,
+    "Municiapilities": munic
 };
 
 let toc = L.control.layers(baseLayers, overlays).addTo(map);
