@@ -11,13 +11,13 @@ map.attributionControl.setPrefix('');
 
 // Protomap basemap PMTiles
 const base = protomapsL.leafletLayer({
-  url: 'http://127.0.0.1:8000/static/pnd.pmtiles', // white protomap basemap
+  url: 'http://127.0.0.1:8000/static/nl.pmtiles', // white protomap basemap
   theme: 'light'
 }).addTo(map);
 
 // Add PMTiles panden layer
 const pandenLayer = protomapsL.leafletLayer({
-  url: 'http://godzilla.bk.tudelft.nl/data/students3d/bagparquet/GEO5019_Dissemination_of_2D_BAG/data/nl.pmtiles',
+  url: 'http://127.0.0.1:8000/static/pnd.pmtiles',
 
   paint_rules: [
     {
