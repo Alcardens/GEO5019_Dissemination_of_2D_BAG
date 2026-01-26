@@ -23,14 +23,31 @@ L.DomEvent.disableClickPropagation(
 
 // BRT - (Base Registry Topography) BaseMap PDOK:
 let options = { maxZoom: 14, attribution: 'Map data: <a href="http://www.pdok.nl">BRT Achtergrondkaart</a>' }
-let basemap_pdok = new L.tileLayer('https://service.pdok.nl/brt/achtergrondkaart/wmts/v2_0/standaard/EPSG:28992/{z}/{x}/{y}.png', options);
+let basemap_pdok = new L.tileLayer('https://service.pdok.nl/brt/achtergrondkaart/wmts/v2_0/standaard/EPSG:3857/{z}/{x}/{y}.png', options);
 
 basemap_pdok.getAttribution = function () {
   return 'BRT Background Map <a href="http://www.kadaster.nl">Kadaster</a>.';
 }
 basemap_pdok.addTo(map);
 
-let munic = protomapsL.leafletLayer({url:'data/bag.pmtiles'})
+// Add PMTiles layer
+//let munic = protomapsL.leafletLayer({url:'data/bag.pmtiles'})
+
+let munic = protomapsL.leafletLayer({
+  url: 'data/municipalities.pmtiles',
+  paint_rules: [
+    {
+      dataLayer: 'naam', // MUST match layer name in PMTiles
+      symbolizer: new protomapsL.PolygonSymbolizer({
+        fill: '#60a5fa',
+        opacity: 0.4,
+        stroke: '#1e3a8a',
+        width: 1
+      })
+    }
+  ]
+});
+
 munic.addTo(map)
 
 // To group the base layers (background) and make the ToC widget
