@@ -46,7 +46,8 @@ leafletRasterLayer(p,{attribution:'© <a href="https://openstreetmap.org/copyrig
 
 // To group the base layers (background) and make the ToC widget
 let baseLayers = {
-  "Topographical map": basemap_osm
+  "Topographical map": basemap_osm,
+  "PMTiles": p
 };
 
 
