@@ -11,7 +11,7 @@ map.attributionControl.setPrefix('');
 
 // Protomap basemap PMTiles
 const base = protomapsL.leafletLayer({
-  url: 'http://godzilla.bk.tudelft.nl/data/students3d/bagparquet/GEO5019_Dissemination_of_2D_BAG/data/pnd.pmtiles', // white protomap basemap
+  url: 'http://127.0.0.1/static/pnd.pmtiles', // white protomap basemap
   theme: 'light'
 }).addTo(map);
 
