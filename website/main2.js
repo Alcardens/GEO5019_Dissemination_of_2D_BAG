@@ -26,6 +26,16 @@ basemap_pdok.getAttribution = function () {
 basemap_pdok.addTo(map);
 
 
+// OSM baselayer
+let options = { maxZoom: 19, attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>' }
+let basemap_osm = new L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', options);
+
+basemap_osm.getAttribution = function () {
+    return 'OSM Background Map <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+}
+basemap_osm.addTo(map);
+
+
 // Add PMTiles panden layer
 const pandenLayer = protomapsL.leafletLayer({
   url: 'http://127.0.0.1:8000/static/pnd.pmtiles',
@@ -62,7 +72,8 @@ const pandenLayer = protomapsL.leafletLayer({
 
 // Layer toggling
 const baseLayers = {
-  "Basemap": basemap_pdok
+  "Basemap PDOK": basemap_pdok,
+  "Basemap OSM": basemap_osm
 };
 
 const overlays = {
