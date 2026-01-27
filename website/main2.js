@@ -177,7 +177,7 @@ function onMapClick(e) {
         // Update button text
         document.getElementById('draw-btn').textContent = 'Click second corner...';
 
-    } else {
+    } else if (secondPoint === null) {
         // SECOND CLICK - store second corner and draw rectangle
         secondPoint = e.latlng;
 
