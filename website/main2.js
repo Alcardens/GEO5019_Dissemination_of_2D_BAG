@@ -9,11 +9,22 @@ const map = L.map('map-canvas', {
 
 map.attributionControl.setPrefix('');
 
-// Protomap basemap PMTiles
-const base = protomapsL.leafletLayer({
-  url: 'http://127.0.0.1:8000/static/nl.pmtiles', // white protomap basemap
-  theme: 'light'
-}).addTo(map);
+//// Protomap basemap PMTiles
+//const base = protomapsL.leafletLayer({
+//  url: 'http://127.0.0.1:8000/static/nl.pmtiles', // white protomap basemap
+//  theme: 'light'
+//}).addTo(map);
+
+
+// BRT - (Base Registry Topography) BaseMap PDOK:
+let options = { maxZoom: 14, attribution: 'Map data: <a href="http://www.pdok.nl">BRT Achtergrondkaart</a>' }
+let basemap_pdok = new L.tileLayer('https://service.pdok.nl/brt/achtergrondkaart/wmts/v2_0/standaard/EPSG:4326/{z}/{x}/{y}.png', options);
+
+basemap_pdok.getAttribution = function () {
+  return 'BRT Background Map <a href="http://www.kadaster.nl">Kadaster</a>.';
+}
+basemap_pdok.addTo(map);
+
 
 // Add PMTiles panden layer
 const pandenLayer = protomapsL.leafletLayer({
@@ -31,7 +42,7 @@ const pandenLayer = protomapsL.leafletLayer({
     }
   ],
 
-  // 👇 THIS enables clicking features
+  // Enabling clicking features
   onClick: (e) => {
     if (!e.feature) return;
 
@@ -51,7 +62,7 @@ const pandenLayer = protomapsL.leafletLayer({
 
 // Layer toggling
 const baseLayers = {
-  "Basemap": base
+  "Basemap": basemap_pdok
 };
 
 const overlays = {
