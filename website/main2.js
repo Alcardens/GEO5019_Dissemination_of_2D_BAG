@@ -16,14 +16,14 @@ map.attributionControl.setPrefix('');
 //}).addTo(map);
 
 
-// BRT - (Base Registry Topography) BaseMap PDOK:
-let options = { maxZoom: 14, attribution: 'Map data: <a href="http://www.pdok.nl">BRT Achtergrondkaart</a>' }
-let basemap_pdok = new L.tileLayer('https://service.pdok.nl/brt/achtergrondkaart/wmts/v2_0/standaard/EPSG:4326/{z}/{x}/{y}.png', options);
-
-basemap_pdok.getAttribution = function () {
-  return 'BRT Background Map <a href="http://www.kadaster.nl">Kadaster</a>.';
-}
-basemap_pdok.addTo(map);
+//// BRT - (Base Registry Topography) BaseMap PDOK:
+//let options = { maxZoom: 14, attribution: 'Map data: <a href="http://www.pdok.nl">BRT Achtergrondkaart</a>' }
+//let basemap_pdok = new L.tileLayer('https://service.pdok.nl/brt/achtergrondkaart/wmts/v2_0/standaard/EPSG:4326/{z}/{x}/{y}.png', options);
+//
+//basemap_pdok.getAttribution = function () {
+//  return 'BRT Background Map <a href="http://www.kadaster.nl">Kadaster</a>.';
+//}
+//basemap_pdok.addTo(map);
 
 
 // OSM baselayer
@@ -72,7 +72,7 @@ const pandenLayer = protomapsL.leafletLayer({
 
 // Layer toggling
 const baseLayers = {
-  "Basemap PDOK": basemap_pdok,
+  //"Basemap PDOK": basemap_pdok,
   "Basemap OSM": basemap_osm
 };
 
