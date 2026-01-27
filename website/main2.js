@@ -1,7 +1,7 @@
-// ===== MAP SETUP =====
+// ===== CRS DEFINITION =====
 proj4.defs('EPSG:28992', '+proj=sterea +lat_0=52.15616055555555 +lon_0=5.38763888888889 +k=0.9999079 +x_0=155000 +y_0=463000 +ellps=bessel +units=m +towgs84=565.2369,50.0087,465.658,-0.406857330322398,0.350732676542563,-1.8703473836068,4.0812 +no_defs');
 
-// ===== MAP + BUILDING VISUALISATION =====
+// ===== MAP SETUP + BUILDING VISUALISATION =====
 // Map setup
 const map = L.map('map-canvas', {
   center: [52.1, 5.1],
@@ -10,14 +10,14 @@ const map = L.map('map-canvas', {
 
 map.attributionControl.setPrefix('');
 
-//// Protomap basemap PMTiles
+//// Protomap basemap PMTiles - didnt work
 //const base = protomapsL.leafletLayer({
 //  url: 'http://127.0.0.1:8000/static/nl.pmtiles', // white protomap basemap
 //  theme: 'light'
 //}).addTo(map);
 
 
-//// BRT - (Base Registry Topography) BaseMap PDOK:
+//// BRT - (Base Registry Topography) BaseMap PDOK - didnt work well
 //let options = { maxZoom: 14, attribution: 'Map data: <a href="http://www.pdok.nl">BRT Achtergrondkaart</a>' }
 //let basemap_pdok = new L.tileLayer('https://service.pdok.nl/brt/achtergrondkaart/wmts/v2_0/standaard/EPSG:4326/{z}/{x}/{y}.png', options);
 //
