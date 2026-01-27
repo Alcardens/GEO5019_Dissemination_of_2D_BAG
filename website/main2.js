@@ -1,6 +1,6 @@
 // ===== MAP SETUP =====
 
-// ===== MAP =====
+// ===== MAP + BUILDING VISUALISATION =====
 // Map setup
 const map = L.map('map-canvas', {
   center: [52.1, 5.1],
@@ -52,7 +52,7 @@ const pandenLayer = protomapsL.leafletLayer({
     }
   ],
 
-  // Enabling clicking features
+  // Enabling clicking features (doesnt work)
   onClick: (e) => {
     if (!e.feature) return;
 
@@ -81,159 +81,6 @@ const overlays = {
 };
 
 L.control.layers(baseLayers, overlays).addTo(map);
-
-
-//// ===== BUILDING VISUALISATION OLD =====
-//
-//// Layer to hold building geometries
-//let buildingsLayer = L.layerGroup().addTo(map);
-//
-//
-//// VERSION 2: Load buildings in visible viewport
-//async function loadBuildingsInView() {
-//    // Get visible map bounds
-//    const bounds = getVisibleBounds();
-//
-//    // Build API URL with bbox filter
-//    const apiUrl = `https://godzilla.bk.tudelft.nl/2dbagparquet/api/collections/panden/items?minx=${bounds.xmin}&miny=${bounds.ymin}&maxx=${bounds.xmax}&maxy=${bounds.ymax}&crs=EPSG:3857&limit=200`;
-//    //const apiUrl = `http://127.0.0.1:8000/collections/panden/items?minx=${bounds.xmin}&miny=${bounds.ymin}&maxx=${bounds.xmax}&maxy=${bounds.ymax}&limit=200`;
-//
-//    try {
-//        console.log('Loading buildings in viewport from:', apiUrl);
-//        const response = await fetch(apiUrl);
-//
-//        if (!response.ok) {
-//            throw new Error(`API error: ${response.status}`);
-//        }
-//
-//        const data = await response.json();
-//        console.log(`Loaded ${data.features ? data.features.length : 0} buildings`);
-//
-//        // Clear existing buildings
-//        buildingsLayer.clearLayers();
-//
-//        // Add each building to the map
-//        if (data.features && data.features.length > 0) {
-//            data.features.forEach(feature => {
-//                displayBuilding(feature);
-//            });
-//        }
-//
-//    } catch (error) {
-//        console.error('Failed to load buildings in viewport:', error);
-//    }
-//}
-//
-//// Function: Display a single building on the map
-//function displayBuilding(feature) {
-//    // Check if feature has geometry
-//    if (!feature.geometry || !feature.geometry.coordinates) {
-//        console.warn('Building has no geometry:', feature);
-//        return;
-//    }
-//
-//    // Convert GeoJSON to Leaflet layer
-//    let buildingLayer = L.geoJSON(feature, {
-//        style: {
-//            color: '#ef4444',        // Red outline
-//            weight: 2,               // Line thickness
-//            fillColor: '#fca5a5',    // Light red fill
-//            fillOpacity: 0.4         // Semi-transparent
-//        },
-//        // CRITICAL: Convert RD coordinates to lat/lng
-//        coordsToLatLng: function(coords) {
-//            // coords = [x, y] in RD (EPSG:28992)
-//            // Need to convert to [lng, lat] for proj4, then to Leaflet's [lat, lng]
-//
-//            let wgs84 = proj4('EPSG:28992', 'EPSG:4326', [coords[0], coords[1]]);
-//            // wgs84 = [lng, lat]
-//
-//            return L.latLng(wgs84[1], wgs84[0]); // Leaflet wants [lat, lng]
-//        },
-//        onEachFeature: function(feature, layer) {
-//            // Add popup with building info
-//            if (feature.properties) {
-//                let popupContent = '<div style="font-size: 0.875rem;">';
-//                popupContent += `<strong>Building ID:</strong> ${feature.id || 'N/A'}<br>`;
-//
-//                // Add other properties
-//                for (let key in feature.properties) {
-//                    popupContent += `<strong>${key}:</strong> ${feature.properties[key]}<br>`;
-//                }
-//
-//                popupContent += '</div>';
-//                layer.bindPopup(popupContent);
-//            }
-//        }
-//    });
-//
-//    // Add to buildings layer
-//    buildingLayer.addTo(buildingsLayer);
-//}
-//
-//
-//
-//// Add a delay to reloading the buildings after moving to make it work more smoothly (less fetches)
-//function debounce(fn, delay) {
-//    let timeout;
-//    return function (...args) {
-//        clearTimeout(timeout);
-//        timeout = setTimeout(() => fn.apply(this, args), delay);
-//    };
-//}
-//
-//const debouncedLoadBuildings = debounce(loadBuildingsInView, 300);
-//
-//
-//// Only load building visualisation when layer is turned on
-//map.on('overlayadd', function (e) {
-//    if (e.layer === buildingsLayer) {
-//        console.log('Buildings layer turned ON');
-//        loadBuildingsInView();
-//
-//        // Start listening to map movement
-//        map.on('moveend', debouncedLoadBuildings);
-//    }
-//});
-//
-//// Don't load buildings/remove buildings loaded when layer is turned off
-//map.on('overlayremove', function (e) {
-//    if (e.layer === buildingsLayer) {
-//        console.log('Buildings layer turned OFF');
-//
-//        // Stop listening
-//        map.off('moveend', debouncedLoadBuildings);
-//
-//        // Optional: clear buildings from map
-//        buildingsLayer.clearLayers();
-//    }
-//});
-//
-//
-//let panden_vis = protomapsL.leafletLayer({
-//  url: 'data/bag.pmtiles',
-//  paint_rules: [
-//    {
-//      dataLayer: 'naam', // MUST match layer name in PMTiles
-//      symbolizer: new protomapsL.PolygonSymbolizer({
-//        fill: '#60a5fa',
-//        opacity: 0.4,
-//        stroke: '#1e3a8a',
-//        width: 1
-//      })
-//    }
-//  ]
-//});
-//
-//panden_vis.addTo(map)
-//
-//// Add a menu with overlay checkboxes for the building visualisation
-//let overlays = {
-//    "Buildings": buildingsLayer,
-//    "Panden": panden_vis
-//};
-//
-//let toc = L.control.layers(baseLayers, overlays).addTo(map);
 
 
 //==== ADD GEOCODER ====//
@@ -270,7 +117,7 @@ register_geocoder = function (mapInstance) {
 register_geocoder(map)
 
 
-// ===== BOUNDING BOX DRAWING =====
+// ===== BOUNDING BOX DRAWING 01 =====
 
 // Variables to store state
 let isDrawing = false;           // Are we currently drawing?
@@ -439,6 +286,178 @@ function clearBoundingBox() {
     // Stop listening for clicks
     map.off('click', onMapClick);
 }
+
+
+
+//// ===== BOUNDING BOX DRAWING 02 =====
+//
+//// Variables to store state
+//let isDrawing = false;           // Are we currently drawing?
+//let firstPoint = null;           // First corner clicked
+//let secondPoint = null;          // Second corner clicked
+//let currentRectangle = null;     // The rectangle shape on the map
+//let tempMarker = null;           // Temporary marker for first point
+//let currentBboxCoords = null;    // Store current bbox coordinates for download
+//
+//// Function: Toggle panel open/closed
+//function togglePanel() {
+//    let panel = document.getElementById('panel-content');
+//    panel.classList.toggle('open');
+//}
+//
+//// Function: Start drawing mode
+//function startDrawing() {
+//    // Clear any existing box first
+//    clearBoundingBox();
+//
+//    // Enable drawing mode
+//    isDrawing = true;
+//
+//    // Update button states
+//    document.getElementById('draw-btn').disabled = true;
+//    document.getElementById('draw-btn').textContent = 'Click first corner...';
+//
+//    // Change cursor to crosshair
+//    document.getElementById('map-canvas').style.cursor = 'crosshair';
+//
+//    // Listen for clicks on the map
+//    map.on('click', onMapClick);
+//}
+//
+//// Function: Handle map clicks while drawing
+//function onMapClick(e) {
+//    if (!isDrawing) return;
+//
+//    if (firstPoint === null) {
+//        // FIRST CLICK - store first corner
+//        firstPoint = e.latlng;
+//
+//        // Add a temporary marker to show where we clicked
+//        tempMarker = L.circleMarker(firstPoint, {
+//            radius: 5,
+//            color: '#2563eb',
+//            fillColor: '#2563eb',
+//            fillOpacity: 0.5
+//        }).addTo(map);
+//
+//        // Update button text
+//        document.getElementById('draw-btn').textContent = 'Click second corner...';
+//
+//    } else {
+//        // SECOND CLICK - store second corner and draw rectangle
+//        secondPoint = e.latlng;
+//
+//        // Remove temporary marker
+//        if (tempMarker) {
+//            map.removeLayer(tempMarker);
+//            tempMarker = null;
+//        }
+//
+//        // Draw the rectangle
+//        drawRectangle(firstPoint, secondPoint);
+//
+//        // Convert to RD coordinates and display
+//        displayCoordinates(firstPoint, secondPoint);
+//
+//        // Stop drawing mode
+//        isDrawing = false;
+//        document.getElementById('map-canvas').style.cursor = '';
+//        document.getElementById('draw-btn').disabled = false;
+//        document.getElementById('draw-btn').textContent = 'Draw Bounding Box';
+//        document.getElementById('clear-btn').disabled = false;
+//
+//        // Stop listening for clicks
+//        map.off('click', onMapClick);
+//    }
+//}
+//
+//// Function: Draw the rectangle on the map
+//function drawRectangle(point1, point2) {
+//    // Create a rectangle between the two points
+//    let bounds = [
+//    [point1.lat, point1.lng],  // First corner you clicked
+//    [point2.lat, point2.lng]   // Second corner you clicked
+//];
+//
+//    currentRectangle = L.rectangle(bounds, {
+//        color: '#2563eb',      // Blue outline
+//        weight: 3,              // Line thickness
+//        fillColor: '#2563eb',   // Blue fill
+//        fillOpacity: 0.1        // Transparent fill
+//    }).addTo(map);
+//}
+//
+//// Function: Convert coordinates and display them
+//function displayCoordinates(point1, point2) {
+//    // Convert lat/lng to RD coordinates (EPSG:28992)
+//    // Leaflet stores coordinates as [lat, lng] but proj4 needs [lng, lat]
+//
+//    let rdPoint1 = proj4('EPSG:4326', 'EPSG:28992', [point1.lng, point1.lat]);
+//    let rdPoint2 = proj4('EPSG:4326', 'EPSG:28992', [point2.lng, point2.lat]);
+//
+//    // Calculate min and max values (because user can click in any order)
+//    let xmin = Math.min(rdPoint1[0], rdPoint2[0]);
+//    let xmax = Math.max(rdPoint1[0], rdPoint2[0]);
+//    let ymin = Math.min(rdPoint1[1], rdPoint2[1]);
+//    let ymax = Math.max(rdPoint1[1], rdPoint2[1]);
+//
+//    // Round to 2 decimal places for cleaner display
+//    xmin = Math.round(xmin * 100) / 100;
+//    ymin = Math.round(ymin * 100) / 100;
+//    xmax = Math.round(xmax * 100) / 100;
+//    ymax = Math.round(ymax * 100) / 100;
+//
+//    // Store for download function
+//    currentBboxCoords = { xmin, ymin, xmax, ymax };
+//
+//    // Update the display
+//    document.getElementById('xmin').textContent = xmin;
+//    document.getElementById('ymin').textContent = ymin;
+//    document.getElementById('xmax').textContent = xmax;
+//    document.getElementById('ymax').textContent = ymax;
+//
+//    // Show the coordinates box
+//    document.getElementById('coordinates').style.display = 'block';
+//
+//    // Log to console (useful for testing your API)
+//    console.log('Bounding Box (RD New):');
+//    console.log(`xmin: ${xmin}, ymin: ${ymin}, xmax: ${xmax}, ymax: ${ymax}`);
+//    console.log(`API format: bbox=${xmin},${ymin},${xmax},${ymax}`);
+//}
+//
+//// Function: Clear the bounding box
+//function clearBoundingBox() {
+//    // Remove rectangle from map
+//    if (currentRectangle) {
+//        map.removeLayer(currentRectangle);
+//        currentRectangle = null;
+//    }
+//
+//    // Remove temporary marker if exists
+//    if (tempMarker) {
+//        map.removeLayer(tempMarker);
+//        tempMarker = null;
+//    }
+//
+//    // Reset state
+//    firstPoint = null;
+//    secondPoint = null;
+//    isDrawing = false;
+//
+//    // Update UI
+//    document.getElementById('coordinates').style.display = 'none';
+//    document.getElementById('clear-btn').disabled = true;
+//    document.getElementById('draw-btn').disabled = false;
+//    document.getElementById('draw-btn').textContent = 'Draw Bounding Box';
+//    document.getElementById('map-canvas').style.cursor = '';
+//
+//    // Clear bbox from download panel
+//    document.getElementById('bbox-display').value = '';
+//    currentBboxCoords = null;
+//
+//    // Stop listening for clicks
+//    map.off('click', onMapClick);
+//}
 
 
 // ===== DOWNLOAD FUNCTIONALITY =====
