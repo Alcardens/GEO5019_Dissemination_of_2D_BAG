@@ -1,4 +1,5 @@
 // ===== MAP SETUP =====
+proj4.defs('EPSG:28992', '+proj=sterea +lat_0=52.15616055555555 +lon_0=5.38763888888889 +k=0.9999079 +x_0=155000 +y_0=463000 +ellps=bessel +units=m +towgs84=565.2369,50.0087,465.658,-0.406857330322398,0.350732676542563,-1.8703473836068,4.0812 +no_defs');
 
 // ===== MAP + BUILDING VISUALISATION =====
 // Map setup
@@ -117,7 +118,7 @@ register_geocoder = function (mapInstance) {
 register_geocoder(map)
 
 
-// ===== BOUNDING BOX DRAWING 01 =====
+// ===== BOUNDING BOX DRAWING =====
 
 // Variables to store state
 let isDrawing = false;           // Are we currently drawing?
@@ -177,7 +178,7 @@ function onMapClick(e) {
         // Update button text
         document.getElementById('draw-btn').textContent = 'Click second corner...';
 
-    } else if (secondPoint === null) {
+    } else {
         // SECOND CLICK - store second corner and draw rectangle
         secondPoint = e.latlng;
 
@@ -295,178 +296,6 @@ function clearBoundingBox() {
     // Stop listening for clicks
     map.off('click', onMapClick);
 }
-
-
-
-//// ===== BOUNDING BOX DRAWING 02 =====
-//
-//// Variables to store state
-//let isDrawing = false;           // Are we currently drawing?
-//let firstPoint = null;           // First corner clicked
-//let secondPoint = null;          // Second corner clicked
-//let currentRectangle = null;     // The rectangle shape on the map
-//let tempMarker = null;           // Temporary marker for first point
-//let currentBboxCoords = null;    // Store current bbox coordinates for download
-//
-//// Function: Toggle panel open/closed
-//function togglePanel() {
-//    let panel = document.getElementById('panel-content');
-//    panel.classList.toggle('open');
-//}
-//
-//// Function: Start drawing mode
-//function startDrawing() {
-//    // Clear any existing box first
-//    clearBoundingBox();
-//
-//    // Enable drawing mode
-//    isDrawing = true;
-//
-//    // Update button states
-//    document.getElementById('draw-btn').disabled = true;
-//    document.getElementById('draw-btn').textContent = 'Click first corner...';
-//
-//    // Change cursor to crosshair
-//    document.getElementById('map-canvas').style.cursor = 'crosshair';
-//
-//    // Listen for clicks on the map
-//    map.on('click', onMapClick);
-//}
-//
-//// Function: Handle map clicks while drawing
-//function onMapClick(e) {
-//    if (!isDrawing) return;
-//
-//    if (firstPoint === null) {
-//        // FIRST CLICK - store first corner
-//        firstPoint = e.latlng;
-//
-//        // Add a temporary marker to show where we clicked
-//        tempMarker = L.circleMarker(firstPoint, {
-//            radius: 5,
-//            color: '#2563eb',
-//            fillColor: '#2563eb',
-//            fillOpacity: 0.5
-//        }).addTo(map);
-//
-//        // Update button text
-//        document.getElementById('draw-btn').textContent = 'Click second corner...';
-//
-//    } else {
-//        // SECOND CLICK - store second corner and draw rectangle
-//        secondPoint = e.latlng;
-//
-//        // Remove temporary marker
-//        if (tempMarker) {
-//            map.removeLayer(tempMarker);
-//            tempMarker = null;
-//        }
-//
-//        // Draw the rectangle
-//        drawRectangle(firstPoint, secondPoint);
-//
-//        // Convert to RD coordinates and display
-//        displayCoordinates(firstPoint, secondPoint);
-//
-//        // Stop drawing mode
-//        isDrawing = false;
-//        document.getElementById('map-canvas').style.cursor = '';
-//        document.getElementById('draw-btn').disabled = false;
-//        document.getElementById('draw-btn').textContent = 'Draw Bounding Box';
-//        document.getElementById('clear-btn').disabled = false;
-//
-//        // Stop listening for clicks
-//        map.off('click', onMapClick);
-//    }
-//}
-//
-//// Function: Draw the rectangle on the map
-//function drawRectangle(point1, point2) {
-//    // Create a rectangle between the two points
-//    let bounds = [
-//    [point1.lat, point1.lng],  // First corner you clicked
-//    [point2.lat, point2.lng]   // Second corner you clicked
-//];
-//
-//    currentRectangle = L.rectangle(bounds, {
-//        color: '#2563eb',      // Blue outline
-//        weight: 3,              // Line thickness
-//        fillColor: '#2563eb',   // Blue fill
-//        fillOpacity: 0.1        // Transparent fill
-//    }).addTo(map);
-//}
-//
-//// Function: Convert coordinates and display them
-//function displayCoordinates(point1, point2) {
-//    // Convert lat/lng to RD coordinates (EPSG:28992)
-//    // Leaflet stores coordinates as [lat, lng] but proj4 needs [lng, lat]
-//
-//    let rdPoint1 = proj4('EPSG:4326', 'EPSG:28992', [point1.lng, point1.lat]);
-//    let rdPoint2 = proj4('EPSG:4326', 'EPSG:28992', [point2.lng, point2.lat]);
-//
-//    // Calculate min and max values (because user can click in any order)
-//    let xmin = Math.min(rdPoint1[0], rdPoint2[0]);
-//    let xmax = Math.max(rdPoint1[0], rdPoint2[0]);
-//    let ymin = Math.min(rdPoint1[1], rdPoint2[1]);
-//    let ymax = Math.max(rdPoint1[1], rdPoint2[1]);
-//
-//    // Round to 2 decimal places for cleaner display
-//    xmin = Math.round(xmin * 100) / 100;
-//    ymin = Math.round(ymin * 100) / 100;
-//    xmax = Math.round(xmax * 100) / 100;
-//    ymax = Math.round(ymax * 100) / 100;
-//
-//    // Store for download function
-//    currentBboxCoords = { xmin, ymin, xmax, ymax };
-//
-//    // Update the display
-//    document.getElementById('xmin').textContent = xmin;
-//    document.getElementById('ymin').textContent = ymin;
-//    document.getElementById('xmax').textContent = xmax;
-//    document.getElementById('ymax').textContent = ymax;
-//
-//    // Show the coordinates box
-//    document.getElementById('coordinates').style.display = 'block';
-//
-//    // Log to console (useful for testing your API)
-//    console.log('Bounding Box (RD New):');
-//    console.log(`xmin: ${xmin}, ymin: ${ymin}, xmax: ${xmax}, ymax: ${ymax}`);
-//    console.log(`API format: bbox=${xmin},${ymin},${xmax},${ymax}`);
-//}
-//
-//// Function: Clear the bounding box
-//function clearBoundingBox() {
-//    // Remove rectangle from map
-//    if (currentRectangle) {
-//        map.removeLayer(currentRectangle);
-//        currentRectangle = null;
-//    }
-//
-//    // Remove temporary marker if exists
-//    if (tempMarker) {
-//        map.removeLayer(tempMarker);
-//        tempMarker = null;
-//    }
-//
-//    // Reset state
-//    firstPoint = null;
-//    secondPoint = null;
-//    isDrawing = false;
-//
-//    // Update UI
-//    document.getElementById('coordinates').style.display = 'none';
-//    document.getElementById('clear-btn').disabled = true;
-//    document.getElementById('draw-btn').disabled = false;
-//    document.getElementById('draw-btn').textContent = 'Draw Bounding Box';
-//    document.getElementById('map-canvas').style.cursor = '';
-//
-//    // Clear bbox from download panel
-//    document.getElementById('bbox-display').value = '';
-//    currentBboxCoords = null;
-//
-//    // Stop listening for clicks
-//    map.off('click', onMapClick);
-//}
 
 
 // ===== DOWNLOAD FUNCTIONALITY =====
