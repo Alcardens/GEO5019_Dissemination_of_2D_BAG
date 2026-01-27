@@ -148,16 +148,19 @@ function startDrawing() {
     // Change cursor to crosshair
     document.getElementById('map-canvas').style.cursor = 'crosshair';
 
-    // Listen for clicks on the map
+    // Listen for clicks on the map with timeout to prevent first click being clicking the button
     //map.on('click', onMapClick);
     setTimeout(() => {
         map.on('click', onMapClick);
-    }, 0);
+    }, 100);
 }
 
 // Function: Handle map clicks while drawing
 function onMapClick(e) {
-    if (!isDrawing) return;
+    if (!isDrawing) {
+        map.off('click', onMapClick);
+        return;
+    }
 
     if (firstPoint === null) {
         // FIRST CLICK - store first corner
@@ -192,13 +195,16 @@ function onMapClick(e) {
 
         // Stop drawing mode
         isDrawing = false;
+
+        // Stop listening for clicks
+        map.off('click', onMapClick);
+
         document.getElementById('map-canvas').style.cursor = '';
         document.getElementById('draw-btn').disabled = false;
         document.getElementById('draw-btn').textContent = 'Draw Bounding Box';
         document.getElementById('clear-btn').disabled = false;
 
-        // Stop listening for clicks
-        map.off('click', onMapClick);
+
     }
 }
 
