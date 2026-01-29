@@ -54,6 +54,9 @@ const pandenLayer = protomapsL.leafletLayer({
   ],
 }).addTo(map);
 
+const vboLayer = protomapsL.leafletLayer({
+  url: 'http://127.0.0.1:8000/static/vbo.pmtiles'}).addTo(map);
+
 
 
 //// Store PMTiles source for querying
@@ -178,7 +181,8 @@ const baseLayers = {
 };
 
 const overlays = {
-  "Buildings": pandenLayer
+  "Panden": pandenLayer,
+  "Verblijfsobjecten": vboLayer
 };
 
 L.control.layers(baseLayers, overlays).addTo(map);

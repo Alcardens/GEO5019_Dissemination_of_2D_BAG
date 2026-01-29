@@ -147,7 +147,7 @@ def read_panden_items(
         crs: str = Query(default='EPSG:28992'),
         woonplaats: str = Query(default=None),
         postcode_4: str = Query(default=None),
-        limit: int = Query(50, ge=1, le=1000), # always show at least 1 and no more than 1000
+        limit: int = Query(50, ge=1, le=10000), # always show at least 1 and no more than 1000
         offset: int = Query(0, ge=0) # ensure that offset is always positive
 ):
     woonplaats = woonplaats.capitalize() if woonplaats else None
@@ -282,7 +282,7 @@ def read_verblijfsobjecten_items(
         woonplaats: str = Query(default=None),
         postcode_4: str = Query(default=None),
         pandRef: str = Query(default=None),
-        limit: int = Query(50, ge=1, le=1000), # always show at least 1 and no more than 1000
+        limit: int = Query(50, ge=1, le=10000), # always show at least 1 and no more than 1000
         offset: int = Query(0, ge=0) # ensure that offset is always positive
 ):
     woonplaats = woonplaats.capitalize() if woonplaats else None
