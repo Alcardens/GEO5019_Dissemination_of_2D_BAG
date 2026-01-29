@@ -38,38 +38,38 @@ basemap_osm.addTo(map);
 
 
 // Add PMTiles panden layer
-//const pandenLayer = protomapsL.leafletLayer({
-//  url: 'http://127.0.0.1:8000/static/pnd.pmtiles',
-//
-//  paintRules: [
-//    {
-//      dataLayer: 'pnd',
-//      symbolizer: new protomapsL.PolygonSymbolizer({
-//        fill: '#ef4444',
-//        opacity: 0.4,
-//        stroke: '#991b1b',
-//        width: 1
-//      })
-//    }
-//  ],
-//
-//  // Enabling clicking features (doesnt work)
-//  onClick: (e) => {
-//    if (!e.feature) return;
-//
-//    const props = e.feature.props;
-//
-//    let html = `<strong>Pand</strong><br>`;
-//    for (const key in props) {
-//      html += `<strong>${key}</strong>: ${props[key]}<br>`;
-//    }
-//
-//    L.popup()
-//      .setLatLng(e.latlng)
-//      .setContent(html)
-//      .openOn(map);
-//  }
-//}).addTo(map);
+const pandenLayer = protomapsL.leafletLayer({
+  url: 'http://127.0.0.1:8000/static/pnd.pmtiles',
+
+  paintRules: [
+    {
+      dataLayer: 'pnd',
+      symbolizer: new protomapsL.PolygonSymbolizer({
+        fill: '#ef4444',
+        opacity: 0.4,
+        stroke: '#991b1b',
+        width: 1
+      })
+    }
+  ],
+
+  // Enabling clicking features (doesnt work)
+  onClick: (e) => {
+    if (!e.feature) return;
+
+    const props = e.feature.props;
+
+    let html = `<strong>Pand</strong><br>`;
+    for (const key in props) {
+      html += `<strong>${key}</strong>: ${props[key]}<br>`;
+    }
+
+    L.popup()
+      .setLatLng(e.latlng)
+      .setContent(html)
+      .openOn(map);
+  }
+}).addTo(map);
 
 
 // Store PMTiles source for querying
