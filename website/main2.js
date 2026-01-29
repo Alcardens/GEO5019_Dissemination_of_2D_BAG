@@ -51,7 +51,7 @@ const pandenLayer = protomapsL.leafletLayer({
         width: 1
       })
     }
-  ]
+  ],
 }).addTo(map);
 
 map.on("click", async (e) => {
@@ -64,7 +64,7 @@ map.on("click", async (e) => {
 
   const url =
     `http://127.0.0.1:8000/collections/panden/items?` +
-    `?minx=${minx}&miny=${miny}&maxx=${maxx}&maxy=${maxy}&crs=EPSG:3857&limit=5`;
+    `?minx=${minx}&miny=${miny}&maxx=${maxx}&maxy=${maxy}&bbox_crs=EPSG:3857&crs=EPSG:3857&limit=5`;
 
   const resp = await fetch(url);
   if (!resp.ok) return;
