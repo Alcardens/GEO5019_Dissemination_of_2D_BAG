@@ -54,19 +54,27 @@ const pandenLayer = protomapsL.leafletLayer({
   ],
 }).addTo(map);
 
+class MyPlaceSymbolizer {
+    draw(context,geom,z,feature) {
+        // console.log(properties)
+        let pt = geom[0][0]
+        var fill = "palegreen"
+        context.fillStyle = fill
+        context.strokeStyle = "black"
+        context.beginPath()
+        context.arc(pt.x,pt.y,4,0,2*Math.PI)
+        context.stroke()
+        context.fill()
+    }
+}
+
 const vboLayer = protomapsL.leafletLayer({
   url: 'http://127.0.0.1:8000/static/vbo.pmtiles',
 
   paintRules: [
     {
       dataLayer: "vbo", // must match the *source layer name* inside vbo.pmtiles
-      symbolizer: new protomapsL.PolygonSymbolizer({
-        radius: 3,
-        fill: "#22c55e",
-        opacity: 0.9,
-        stroke: "#14532d",
-        width: 1
-      })
+      symbolizer: new MyPlaceSymbolizer()
     }
   ],
 }).addTo(map);
