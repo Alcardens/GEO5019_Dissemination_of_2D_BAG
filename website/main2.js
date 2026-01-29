@@ -53,138 +53,138 @@ const pandenLayer = protomapsL.leafletLayer({
     }
   ],
 
-  // Enabling clicking features (doesnt work)
-  onClick: (e) => {
-    if (!e.feature) return;
-
-    const props = e.feature.props;
-
-    let html = `<strong>Pand</strong><br>`;
-    for (const key in props) {
-      html += `<strong>${key}</strong>: ${props[key]}<br>`;
-    }
-
-    L.popup()
-      .setLatLng(e.latlng)
-      .setContent(html)
-      .openOn(map);
-  }
+//  // Enabling clicking features (doesnt work)
+//  onClick: (e) => {
+//    if (!e.feature) return;
+//
+//    const props = e.feature.props;
+//
+//    let html = `<strong>Pand</strong><br>`;
+//    for (const key in props) {
+//      html += `<strong>${key}</strong>: ${props[key]}<br>`;
+//    }
+//
+//    L.popup()
+//      .setLatLng(e.latlng)
+//      .setContent(html)
+//      .openOn(map);
+//  }
 }).addTo(map);
 
 
-// Store PMTiles source for querying
-let pmtilesSource = null;
-
-// Initialize PMTiles source for feature queries
-(async () => {
-    try {
-        pmtilesSource = new pmtiles.PMTiles('http://127.0.0.1:8000/static/pnd.pmtiles');
-        await pmtilesSource.getHeader();
-        console.log('PMTiles source loaded for feature queries');
-    } catch (error) {
-        console.error('Failed to load PMTiles source:', error);
-    }
-})();
-
-// Add click handler to query features
-map.on('click', async function(e) {
-    if (!pmtilesSource) {
-        console.log('PMTiles source not ready yet');
-        return;
-    }
-
-    const zoom = map.getZoom();
-    const latlng = e.latlng;
-
-    // Only query if buildings layer is visible
-    if (!map.hasLayer(buildingsLayer)) {
-        return;
-    }
-
-    try {
-        // Convert click coordinates to tile coordinates
-        const tileZoom = Math.min(zoom, 14); // Use max zoom 14 for tiles
-        const x = Math.floor((latlng.lng + 180) / 360 * Math.pow(2, tileZoom));
-        const y = Math.floor((1 - Math.log(Math.tan(latlng.lat * Math.PI / 180) + 1 / Math.cos(latlng.lat * Math.PI / 180)) / Math.PI) / 2 * Math.pow(2, tileZoom));
-
-        // Get the tile data
-        const tileData = await pmtilesSource.getZxy(tileZoom, x, y);
-
-        if (!tileData) {
-            console.log('No tile data at this location');
-            return;
-        }
-
-        // Parse the tile (MVT format)
-        const tile = new mapboxgl.VectorTile(new Pbf(tileData.data));
-
-        // Get the 'pnd' layer
-        const layer = tile.layers['pnd'];
-
-        if (!layer) {
-            console.log('No pnd layer in tile');
-            return;
-        }
-
-        // Convert click point to tile pixel coordinates
-        const tileSize = 256;
-        const worldSize = tileSize * Math.pow(2, tileZoom);
-        const pixelX = ((latlng.lng + 180) / 360 * worldSize) % tileSize;
-        const pixelY = ((1 - Math.log(Math.tan(latlng.lat * Math.PI / 180) + 1 / Math.cos(latlng.lat * Math.PI / 180)) / Math.PI) / 2 * worldSize) % tileSize;
-
-        // Check each feature to see if it contains the click point
-        let clickedFeature = null;
-
-        for (let i = 0; i < layer.length; i++) {
-            const feature = layer.feature(i);
-            const geom = feature.loadGeometry();
-
-            // Simple point-in-polygon check
-            if (pointInPolygon([pixelX, pixelY], geom)) {
-                clickedFeature = feature;
-                break;
-            }
-        }
-
-        if (clickedFeature) {
-            // Show popup with feature properties
-            const props = clickedFeature.properties;
-
-            let html = '<div style="font-size: 0.875rem;"><strong>Pand</strong><br>';
-            for (const key in props) {
-                html += `<strong>${key}:</strong> ${props[key]}<br>`;
-            }
-            html += '</div>';
-
-            L.popup()
-                .setLatLng(latlng)
-                .setContent(html)
-                .openOn(map);
-        } else {
-            console.log('No feature found at click point');
-        }
-
-    } catch (error) {
-        console.error('Error querying building:', error);
-    }
-});
-
-// Helper function: point-in-polygon test
-function pointInPolygon(point, polygons) {
-    for (const polygon of polygons) {
-        let inside = false;
-        for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
-            const xi = polygon[i].x, yi = polygon[i].y;
-            const xj = polygon[j].x, yj = polygon[j].y;
-
-            const intersect = ((yi > point[1]) !== (yj > point[1]))
-                && (point[0] < (xj - xi) * (point[1] - yi) / (yj - yi) + xi);
-            if (intersect) inside = !inside;
-        }
-        if (inside) return true;
-    }
-    return false;
-}
+//// Store PMTiles source for querying
+//let pmtilesSource = null;
+//
+//// Initialize PMTiles source for feature queries
+//(async () => {
+//    try {
+//        pmtilesSource = new pmtiles.PMTiles('http://127.0.0.1:8000/static/pnd.pmtiles');
+//        await pmtilesSource.getHeader();
+//        console.log('PMTiles source loaded for feature queries');
+//    } catch (error) {
+//        console.error('Failed to load PMTiles source:', error);
+//    }
+//})();
+//
+//// Add click handler to query features
+//map.on('click', async function(e) {
+//    if (!pmtilesSource) {
+//        console.log('PMTiles source not ready yet');
+//        return;
+//    }
+//
+//    const zoom = map.getZoom();
+//    const latlng = e.latlng;
+//
+//    // Only query if buildings layer is visible
+//    if (!map.hasLayer(buildingsLayer)) {
+//        return;
+//    }
+//
+//    try {
+//        // Convert click coordinates to tile coordinates
+//        const tileZoom = Math.min(zoom, 14); // Use max zoom 14 for tiles
+//        const x = Math.floor((latlng.lng + 180) / 360 * Math.pow(2, tileZoom));
+//        const y = Math.floor((1 - Math.log(Math.tan(latlng.lat * Math.PI / 180) + 1 / Math.cos(latlng.lat * Math.PI / 180)) / Math.PI) / 2 * Math.pow(2, tileZoom));
+//
+//        // Get the tile data
+//        const tileData = await pmtilesSource.getZxy(tileZoom, x, y);
+//
+//        if (!tileData) {
+//            console.log('No tile data at this location');
+//            return;
+//        }
+//
+//        // Parse the tile (MVT format)
+//        const tile = new mapboxgl.VectorTile(new Pbf(tileData.data));
+//
+//        // Get the 'pnd' layer
+//        const layer = tile.layers['pnd'];
+//
+//        if (!layer) {
+//            console.log('No pnd layer in tile');
+//            return;
+//        }
+//
+//        // Convert click point to tile pixel coordinates
+//        const tileSize = 256;
+//        const worldSize = tileSize * Math.pow(2, tileZoom);
+//        const pixelX = ((latlng.lng + 180) / 360 * worldSize) % tileSize;
+//        const pixelY = ((1 - Math.log(Math.tan(latlng.lat * Math.PI / 180) + 1 / Math.cos(latlng.lat * Math.PI / 180)) / Math.PI) / 2 * worldSize) % tileSize;
+//
+//        // Check each feature to see if it contains the click point
+//        let clickedFeature = null;
+//
+//        for (let i = 0; i < layer.length; i++) {
+//            const feature = layer.feature(i);
+//            const geom = feature.loadGeometry();
+//
+//            // Simple point-in-polygon check
+//            if (pointInPolygon([pixelX, pixelY], geom)) {
+//                clickedFeature = feature;
+//                break;
+//            }
+//        }
+//
+//        if (clickedFeature) {
+//            // Show popup with feature properties
+//            const props = clickedFeature.properties;
+//
+//            let html = '<div style="font-size: 0.875rem;"><strong>Pand</strong><br>';
+//            for (const key in props) {
+//                html += `<strong>${key}:</strong> ${props[key]}<br>`;
+//            }
+//            html += '</div>';
+//
+//            L.popup()
+//                .setLatLng(latlng)
+//                .setContent(html)
+//                .openOn(map);
+//        } else {
+//            console.log('No feature found at click point');
+//        }
+//
+//    } catch (error) {
+//        console.error('Error querying building:', error);
+//    }
+//});
+//
+//// Helper function: point-in-polygon test
+//function pointInPolygon(point, polygons) {
+//    for (const polygon of polygons) {
+//        let inside = false;
+//        for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
+//            const xi = polygon[i].x, yi = polygon[i].y;
+//            const xj = polygon[j].x, yj = polygon[j].y;
+//
+//            const intersect = ((yi > point[1]) !== (yj > point[1]))
+//                && (point[0] < (xj - xi) * (point[1] - yi) / (yj - yi) + xi);
+//            if (intersect) inside = !inside;
+//        }
+//        if (inside) return true;
+//    }
+//    return false;
+//}
 
 
 // Layer toggling
