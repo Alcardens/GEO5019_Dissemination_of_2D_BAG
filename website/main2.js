@@ -63,7 +63,7 @@ map.on("click", async (e) => {
   const minx = p.x - r, miny = p.y - r, maxx = p.x + r, maxy = p.y + r;
 
   const url =
-    `https://godzilla.bk.tudelft.nl/2dbagparquet/api/collections/panden/items` +
+    `http://127.0.0.1:8000/collections/panden/items?` +
     `?minx=${minx}&miny=${miny}&maxx=${maxx}&maxy=${maxy}&crs=EPSG:3857&limit=5`;
 
   const resp = await fetch(url);
@@ -502,8 +502,8 @@ async function downloadPandenGeoJSON() {
 
 
     // Build base API URL
-    let baseUrl = `https://godzilla.bk.tudelft.nl/2dbagparquet/api/collections/panden/items?`;
-    //let baseUrl = `http://127.0.0.1:8000/collections/panden/items?`;
+    // let baseUrl = `https://godzilla.bk.tudelft.nl/2dbagparquet/api/collections/panden/items?`;
+    let baseUrl = `http://127.0.0.1:8000/collections/panden/items?`;
     let hasFilters = false;
 
     // Add gemeente filter if provided
