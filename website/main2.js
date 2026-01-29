@@ -210,6 +210,37 @@ map.on("click", async (e) => {
   L.popup().setLatLng(e.latlng).setContent(html).openOn(map);
 });
 
+let selectedPandLayer = null;
+
+async function showVBO(pandId) {
+  // Remove previous highlight
+  if (selectedPandLayer) {
+    map.removeLayer(selectedPandLayer);
+    selectedPandLayer = null;
+  }
+
+  // Try the standard OGC "items/{id}" endpoint first
+  let url = `http://127.0.0.1:8000/collections/verblijfsobjecten/items/pandRef=${encodeURIComponent(pandId)}`;
+
+  let resp = await fetch(url);
+
+  if (!resp.ok) return;
+
+  const data = await resp.json();
+
+  // If it returned a FeatureCollection, take the first feature
+  const feature = data.type === "FeatureCollection" ? data.features?.[0] : data;
+  if (!feature) return;
+
+  // Add to map
+  selectedPandLayer = L.geoJSON(feature, {
+    style: { weight: 3, opacity: 1, fillOpacity: 0.1 }
+  }).addTo(map);
+
+  // Zoom to it
+  map.fitBounds(selectedPandLayer.getBounds());
+}
+
 
 //==== ADD GEOCODER ====//
 // Register a geocoder to the map app
