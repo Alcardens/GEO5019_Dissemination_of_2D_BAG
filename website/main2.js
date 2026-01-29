@@ -53,24 +53,25 @@ const pandenLayer = protomapsL.leafletLayer({
     }
   ],
 
-//  // Enabling clicking features (doesnt work)
-//  onClick: (e) => {
-//    if (!e.feature) return;
-//
-//    const props = e.feature.props;
-//
-//    let html = `<strong>Pand</strong><br>`;
-//    for (const key in props) {
-//      html += `<strong>${key}</strong>: ${props[key]}<br>`;
-//    }
-//
-//    L.popup()
-//      .setLatLng(e.latlng)
-//      .setContent(html)
-//      .openOn(map);
-//  }
-}).addTo(map);
+  onClick: (e) => {
+    if (!e.feature) return;
 
+    const props = e.feature.props; // protomaps uses `props`
+    const id = props.pand_id || props.id || props.identificatie || "(no id)";
+
+    const html = `
+      <div style="font-size: 0.9rem">
+        <div style="font-weight:700;margin-bottom:.25rem">Pand ${id}</div>
+        <pre style="white-space:pre-wrap;margin:0">${JSON.stringify(props, null, 2)}</pre>
+      </div>
+    `;
+
+    L.popup()
+      .setLatLng(e.latlng)
+      .setContent(html)
+      .openOn(map);
+  }
+}).addTo(map);
 
 //// Store PMTiles source for querying
 //let pmtilesSource = null;
