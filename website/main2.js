@@ -208,6 +208,22 @@ map.on("click", async (e) => {
   for (const k in props) html += `<strong>${k}</strong>: ${props[k]}<br>`;
 
   L.popup().setLatLng(e.latlng).setContent(html).openOn(map);
+
+    const data = await resp.json();
+  if (!data.features?.length) return;
+
+  const f = data.features[0];
+  const pandId = getPandId(f);
+  if (!pandId) return;
+
+  // show popup if you want
+  L.popup()
+    .setLatLng(e.latlng)
+    .setContent(`Pand id: <b>${pandId}</b>`)
+    .openOn(map);
+
+  // fetch + display full geojson for that pand
+  await showPandGeoJSON(pandId);
 });
 
 let selectedPandLayer = null;
