@@ -55,7 +55,7 @@ const pandenLayer = protomapsL.leafletLayer({
 }).addTo(map);
 
 const vboLayer = protomapsL.leafletLayer({
-  url: 'http://127.0.0.1:8000/static/vbo.pmtiles'},
+  url: 'http://127.0.0.1:8000/static/vbo.pmtiles',
   paintRules: [
     {
       dataLayer: "vbo", // must match the *source layer name* inside vbo.pmtiles
@@ -67,7 +67,7 @@ const vboLayer = protomapsL.leafletLayer({
         width: 1
       })
     }
-  ]).addTo(map);
+  ],).addTo(map);
 
 
 
