@@ -52,26 +52,34 @@ const pandenLayer = protomapsL.leafletLayer({
       })
     }
   ],
-
-  onClick: (e) => {
-    if (!e.feature) return;
-
-    const props = e.feature.props; // protomaps uses `props`
-    const id = props.pand_id || props.id || props.identificatie || "(no id)";
-
-    const html = `
-      <div style="font-size: 0.9rem">
-        <div style="font-weight:700;margin-bottom:.25rem">Pand ${id}</div>
-        <pre style="white-space:pre-wrap;margin:0">${JSON.stringify(props, null, 2)}</pre>
-      </div>
-    `;
-
-    L.popup()
-      .setLatLng(e.latlng)
-      .setContent(html)
-      .openOn(map);
-  }
 }).addTo(map);
+
+map.on("click", async (e) => {
+  // Project lat/lng -> EPSG:3857 meters (Leaflet default CRS)
+  const p = map.options.crs.project(e.latlng);
+
+  // tiny 2m x 2m bbox around click (tweak as needed)
+  const r = 1;
+  const minx = p.x - r, miny = p.y - r, maxx = p.x + r, maxy = p.y + r;
+
+  const url =
+    `https://godzilla.bk.tudelft.nl/2dbagparquet/api/collections/panden/items` +
+    `?minx=${minx}&miny=${miny}&maxx=${maxx}&maxy=${maxy}&crs=EPSG:3857&limit=5`;
+
+  const resp = await fetch(url);
+  if (!resp.ok) return;
+
+  const data = await resp.json();
+  if (!data.features || !data.features.length) return;
+
+  const f = data.features[0];
+  const props = f.properties || {};
+
+  let html = `<strong>Pand</strong><br>`;
+  for (const k in props) html += `<strong>${k}</strong>: ${props[k]}<br>`;
+
+  L.popup().setLatLng(e.latlng).setContent(html).openOn(map);
+});
 
 //// Store PMTiles source for querying
 //let pmtilesSource = null;
