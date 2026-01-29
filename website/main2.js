@@ -51,7 +51,7 @@ const pandenLayer = protomapsL.leafletLayer({
         width: 1
       })
     }
-  ],
+  ]
 }).addTo(map);
 
 map.on("click", async (e) => {
