@@ -58,11 +58,11 @@ class MyPlaceSymbolizer {
     draw(context,geom,z,feature) {
         // console.log(properties)
         let pt = geom[0][0]
-        var fill = "palegreen"
+        var fill = "gray"
         context.fillStyle = fill
         context.strokeStyle = "black"
         context.beginPath()
-        context.arc(pt.x,pt.y,4,0,2*Math.PI)
+        context.arc(pt.x,pt.y,2,0,2*Math.PI)
         context.stroke()
         context.fill()
     }
@@ -74,7 +74,8 @@ const vboLayer = protomapsL.leafletLayer({
   paintRules: [
     {
       dataLayer: "vbo", // must match the *source layer name* inside vbo.pmtiles
-      symbolizer: new MyPlaceSymbolizer()
+      symbolizer: new MyPlaceSymbolizer(),
+      minzoom: 11
     }
   ],
 }).addTo(map);
