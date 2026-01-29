@@ -67,7 +67,7 @@ const vboLayer = protomapsL.leafletLayer({
         width: 1
       })
     }
-  ],).addTo(map);
+  ],}).addTo(map);
 
 
 
