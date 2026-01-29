@@ -183,6 +183,37 @@ const overlays = {
 
 L.control.layers(baseLayers, overlays).addTo(map);
 
+let selectedPandLayer = null;
+
+async function showVBO(pandId) {
+  // Remove previous highlight
+  if (selectedPandLayer) {
+    map.removeLayer(selectedPandLayer);
+    selectedPandLayer = null;
+  }
+
+  // Try the standard OGC "items/{id}" endpoint first
+  let url = `http://127.0.0.1:8000/collections/verblijfsobjecten/items?pandRef=${encodeURIComponent(pandId)&crs=EPSG:3857}`;
+
+  let resp = await fetch(url);
+
+  if (!resp.ok) return;
+
+  const data = await resp.json();
+
+  // If it returned a FeatureCollection, take the first feature
+  const feature = data.type === "FeatureCollection" ? data.features?.[0] : data;
+  if (!feature) return;
+
+  // Add to map
+  selectedPandLayer = L.geoJSON(feature, {
+    style: { weight: 3, opacity: 1, fillOpacity: 0.1 }
+  }).addTo(map);
+
+  // Zoom to it
+  map.fitBounds(selectedPandLayer.getBounds());
+}
+
 map.on("click", async (e) => {
   // Project lat/lng -> EPSG:3857 meters (Leaflet default CRS)
   const p = map.options.crs.project(e.latlng);
@@ -192,7 +223,7 @@ map.on("click", async (e) => {
   const minx = p.x - r, miny = p.y - r, maxx = p.x + r, maxy = p.y + r;
 
   const url =
-    `http://127.0.0.1:8000/collections/panden/items?` +
+    `http://127.0.0.1:8000/collections/panden/items` +
     `?minx=${minx}&miny=${miny}&maxx=${maxx}&maxy=${maxy}&bbox_crs=EPSG:3857&crs=EPSG:3857&limit=5`;
 
   const resp = await fetch(url);
@@ -225,37 +256,6 @@ map.on("click", async (e) => {
   // fetch + display full geojson for that pand
   await showPandGeoJSON(pandId);
 });
-
-let selectedPandLayer = null;
-
-async function showVBO(pandId) {
-  // Remove previous highlight
-  if (selectedPandLayer) {
-    map.removeLayer(selectedPandLayer);
-    selectedPandLayer = null;
-  }
-
-  // Try the standard OGC "items/{id}" endpoint first
-  let url = `http://127.0.0.1:8000/collections/verblijfsobjecten/items/pandRef=${encodeURIComponent(pandId)}`;
-
-  let resp = await fetch(url);
-
-  if (!resp.ok) return;
-
-  const data = await resp.json();
-
-  // If it returned a FeatureCollection, take the first feature
-  const feature = data.type === "FeatureCollection" ? data.features?.[0] : data;
-  if (!feature) return;
-
-  // Add to map
-  selectedPandLayer = L.geoJSON(feature, {
-    style: { weight: 3, opacity: 1, fillOpacity: 0.1 }
-  }).addTo(map);
-
-  // Zoom to it
-  map.fitBounds(selectedPandLayer.getBounds());
-}
 
 
 //==== ADD GEOCODER ====//

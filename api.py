@@ -152,7 +152,7 @@ def read_panden_items(
 ):
     woonplaats = woonplaats.capitalize() if woonplaats else None
 
-    geom_bbox = f"ST_MakeEnvelope({minx},{miny},{maxx},{maxy})" if crs == 'EPSG:28992' else f"ST_Transform(ST_MakeEnvelope({minx},{miny},{maxx},{maxy}),'{bbox_crs}','EPSG:28992')"
+    geom_bbox = f"ST_MakeEnvelope({minx},{miny},{maxx},{maxy})" if bbox_crs == 'EPSG:28992' else f"ST_Transform(ST_MakeEnvelope({minx},{miny},{maxx},{maxy}),'{bbox_crs}','EPSG:28992')"
     geom_crs = "pnd.geom" if crs == 'EPSG:28992' else f"ST_Transform(pnd.geom,'EPSG:28992','{crs}')"
 
     from_list = ["'pnd.parquet' AS pnd"]
@@ -287,7 +287,7 @@ def read_verblijfsobjecten_items(
 ):
     woonplaats = woonplaats.capitalize() if woonplaats else None
 
-    geom_bbox = f"ST_MakeEnvelope({minx},{miny},{maxx},{maxy})" if crs == 'EPSG:28992' else f"ST_Transform(ST_MakeEnvelope({minx},{miny},{maxx},{maxy}),'{bbox_crs}','EPSG:28992')"
+    geom_bbox = f"ST_MakeEnvelope({minx},{miny},{maxx},{maxy})" if bbox_crs == 'EPSG:28992' else f"ST_Transform(ST_MakeEnvelope({minx},{miny},{maxx},{maxy}),'{bbox_crs}','EPSG:28992')"
     geom_crs = "vbo.geom" if crs == 'EPSG:28992' else f"ST_Transform(vbo.geom,'EPSG:28992','{crs}')"
 
     from_list = ["'vbo.parquet' AS vbo"]
