@@ -185,6 +185,16 @@ L.control.layers(baseLayers, overlays).addTo(map);
 
 let selectedPandLayer = null;
 
+function getPandId(feature) {
+  return (
+    feature?.id ??
+    feature?.properties?.identificatie ??
+    feature?.properties?.pandId ??
+    feature?.properties?.pand_id ??
+    null
+  );
+}
+
 async function showVBO(pandId) {
   // Remove previous highlight
   if (selectedPandLayer) {
@@ -192,69 +202,58 @@ async function showVBO(pandId) {
     selectedPandLayer = null;
   }
 
-  // Try the standard OGC "items/{id}" endpoint first
-  let url = `http://127.0.0.1:8000/collections/verblijfsobjecten/items?pandRef=${encodeURIComponent(pandId)}&crs=EPSG:3857`;
-
-  let resp = await fetch(url);
-
-  if (!resp.ok) return;
-
-  const data = await resp.json();
-
-  // If it returned a FeatureCollection, take the first feature
-  const feature = data.type === "FeatureCollection" ? data.features?.[0] : data;
-  if (!feature) return;
-
-  // Add to map
-  selectedPandLayer = L.geoJSON(feature, {
-    style: { weight: 3, opacity: 1, fillOpacity: 0.1 }
-  }).addTo(map);
-
-  // Zoom to it
-  map.fitBounds(selectedPandLayer.getBounds());
-}
-
-map.on("click", async (e) => {
-  // Project lat/lng -> EPSG:3857 meters (Leaflet default CRS)
-  const p = map.options.crs.project(e.latlng);
-
-  // tiny 2m x 2m bbox around click (tweak as needed)
-  const r = 1;
-  const minx = p.x - r, miny = p.y - r, maxx = p.x + r, maxy = p.y + r;
-
   const url =
-    `http://127.0.0.1:8000/collections/panden/items` +
-    `?minx=${minx}&miny=${miny}&maxx=${maxx}&maxy=${maxy}&bbox_crs=EPSG:3857&crs=EPSG:3857&limit=5`;
+    `http://127.0.0.1:8000/collections/verblijfsobjecten/items` +
+    `?pandRef=${encodeURIComponent(pandId)}&crs=EPSG:3857`;
 
   const resp = await fetch(url);
   if (!resp.ok) return;
 
   const data = await resp.json();
-  if (!data.features || !data.features.length) return;
+  if (!data?.features?.length) return;
+
+  // If you want to show ALL VBOs for that pand, use the whole collection.
+  // If you only want the first one, replace `data` with `data.features[0]`.
+  selectedPandLayer = L.geoJSON(data, {
+    style: { weight: 3, opacity: 1, fillOpacity: 0.1 }
+  }).addTo(map);
+
+  map.fitBounds(selectedPandLayer.getBounds());
+}
+
+map.on("click", async (e) => {
+  const p = map.options.crs.project(e.latlng);
+
+  // tiny 2m x 2m bbox around click
+  const r = 1;
+  const minx = p.x - r, miny = p.y - r, maxx = p.x + r, maxy = p.y + r;
+
+  const url =
+    `http://127.0.0.1:8000/collections/panden/items` +
+    `?minx=${minx}&miny=${miny}&maxx=${maxx}&maxy=${maxy}` +
+    `&bbox_crs=EPSG:3857&crs=EPSG:3857&limit=5`;
+
+  const resp = await fetch(url);
+  if (!resp.ok) return;
+
+  const data = await resp.json();
+  if (!data?.features?.length) return;
 
   const f = data.features[0];
   const props = f.properties || {};
+  const pandId = getPandId(f);
 
+  // Popup (props + id)
   let html = `<strong>Pand</strong><br>`;
+  if (pandId) html += `<strong>pandId</strong>: <b>${pandId}</b><br>`;
   for (const k in props) html += `<strong>${k}</strong>: ${props[k]}<br>`;
 
   L.popup().setLatLng(e.latlng).setContent(html).openOn(map);
 
-    const data = await resp.json();
-  if (!data.features?.length) return;
-
-  const f = data.features[0];
-  const pandId = getPandId(f);
   if (!pandId) return;
 
-  // show popup if you want
-  L.popup()
-    .setLatLng(e.latlng)
-    .setContent(`Pand id: <b>${pandId}</b>`)
-    .openOn(map);
-
-  // fetch + display full geojson for that pand
-  await showPandGeoJSON(pandId);
+  // Fetch + display VBO GeoJSON for that pand
+  await showVBO(pandId);
 });
 
 
