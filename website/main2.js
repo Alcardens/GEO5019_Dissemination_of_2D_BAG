@@ -43,7 +43,7 @@ const pandenLayer = protomapsL.leafletLayer({
 
   paintRules: [
     {
-      dataLayer: 'panden',
+      dataLayer: 'pnd',
       symbolizer: new protomapsL.PolygonSymbolizer({
         fill: '#ef4444',
         opacity: 0.4,
