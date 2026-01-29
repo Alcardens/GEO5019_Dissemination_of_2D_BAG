@@ -55,7 +55,19 @@ const pandenLayer = protomapsL.leafletLayer({
 }).addTo(map);
 
 const vboLayer = protomapsL.leafletLayer({
-  url: 'http://127.0.0.1:8000/static/vbo.pmtiles'}).addTo(map);
+  url: 'http://127.0.0.1:8000/static/vbo.pmtiles'},
+  paintRules: [
+    {
+      dataLayer: "vbo", // must match the *source layer name* inside vbo.pmtiles
+      symbolizer: new protomapsL.PolygonSymbolizer({
+        radius: 4,
+        fill: "#22c55e",
+        opacity: 0.9,
+        stroke: "#14532d",
+        width: 1
+      })
+    }
+  ]).addTo(map);
 
 
 
