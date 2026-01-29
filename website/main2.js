@@ -29,7 +29,7 @@ map.attributionControl.setPrefix('');
 
 // OSM baselayer
 let options = { maxZoom: 19, attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>' }
-let basemap_osm = new L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', options);
+let basemap_osm = new L.tileLayer('https://cartodb-basemaps-{s}.global.ssl.fastly.net/light_all/{z}/{x}/{y}.png', options);
 
 basemap_osm.getAttribution = function () {
     return 'OSM Background Map <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
