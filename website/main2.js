@@ -60,14 +60,14 @@ const vboLayer = protomapsL.leafletLayer({
     {
       dataLayer: "vbo", // must match the *source layer name* inside vbo.pmtiles
       symbolizer: new protomapsL.PolygonSymbolizer({
-        radius: 4,
         fill: "#22c55e",
         opacity: 0.9,
         stroke: "#14532d",
         width: 1
       })
     }
-  ],}).addTo(map);
+  ],
+}).addTo(map);
 
 
 
