@@ -193,7 +193,7 @@ async function showVBO(pandId) {
   }
 
   // Try the standard OGC "items/{id}" endpoint first
-  let url = `http://127.0.0.1:8000/collections/verblijfsobjecten/items?pandRef=${encodeURIComponent(pandId)&crs=EPSG:3857}`;
+  let url = `http://127.0.0.1:8000/collections/verblijfsobjecten/items?pandRef=${encodeURIComponent(pandId)}&crs=EPSG:3857`;
 
   let resp = await fetch(url);
 
