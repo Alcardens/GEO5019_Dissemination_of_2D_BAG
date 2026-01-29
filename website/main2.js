@@ -54,32 +54,7 @@ const pandenLayer = protomapsL.leafletLayer({
   ],
 }).addTo(map);
 
-map.on("click", async (e) => {
-  // Project lat/lng -> EPSG:3857 meters (Leaflet default CRS)
-  const p = map.options.crs.project(e.latlng);
 
-  // tiny 2m x 2m bbox around click (tweak as needed)
-  const r = 1;
-  const minx = p.x - r, miny = p.y - r, maxx = p.x + r, maxy = p.y + r;
-
-  const url =
-    `http://127.0.0.1:8000/collections/panden/items?` +
-    `?minx=${minx}&miny=${miny}&maxx=${maxx}&maxy=${maxy}&bbox_crs=EPSG:3857&crs=EPSG:3857&limit=5`;
-
-  const resp = await fetch(url);
-  if (!resp.ok) return;
-
-  const data = await resp.json();
-  if (!data.features || !data.features.length) return;
-
-  const f = data.features[0];
-  const props = f.properties || {};
-
-  let html = `<strong>Pand</strong><br>`;
-  for (const k in props) html += `<strong>${k}</strong>: ${props[k]}<br>`;
-
-  L.popup().setLatLng(e.latlng).setContent(html).openOn(map);
-});
 
 //// Store PMTiles source for querying
 //let pmtilesSource = null;
@@ -207,6 +182,33 @@ const overlays = {
 };
 
 L.control.layers(baseLayers, overlays).addTo(map);
+
+map.on("click", async (e) => {
+  // Project lat/lng -> EPSG:3857 meters (Leaflet default CRS)
+  const p = map.options.crs.project(e.latlng);
+
+  // tiny 2m x 2m bbox around click (tweak as needed)
+  const r = 1;
+  const minx = p.x - r, miny = p.y - r, maxx = p.x + r, maxy = p.y + r;
+
+  const url =
+    `http://127.0.0.1:8000/collections/panden/items?` +
+    `?minx=${minx}&miny=${miny}&maxx=${maxx}&maxy=${maxy}&bbox_crs=EPSG:3857&crs=EPSG:3857&limit=5`;
+
+  const resp = await fetch(url);
+  if (!resp.ok) return;
+
+  const data = await resp.json();
+  if (!data.features || !data.features.length) return;
+
+  const f = data.features[0];
+  const props = f.properties || {};
+
+  let html = `<strong>Pand</strong><br>`;
+  for (const k in props) html += `<strong>${k}</strong>: ${props[k]}<br>`;
+
+  L.popup().setLatLng(e.latlng).setContent(html).openOn(map);
+});
 
 
 //==== ADD GEOCODER ====//
