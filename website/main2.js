@@ -272,6 +272,37 @@ function startDrawing() {
     }, 100);
 }
 
+// Close panels when clicking outside of them
+document.addEventListener("click", function (event) {
+    const bboxPanel = document.querySelector(".control-panel");
+    const bboxContent = document.getElementById("panel-content");
+    const bboxIcon = bboxPanel.querySelector(".icon-btn");
+
+    const downloadPanel = document.querySelector(".download-panel");
+    const downloadContent = document.getElementById("download-panel-content");
+    const downloadIcon = document.getElementById("download-icon");
+
+    // --- Bounding box panel ---
+    if (
+        bboxContent.classList.contains("open") &&
+        !bboxPanel.contains(event.target)
+    ) {
+        bboxContent.classList.remove("open");
+    }
+
+    // --- Download panel ---
+    if (
+        downloadContent.classList.contains("open") &&
+        !downloadPanel.contains(event.target)
+    ) {
+        downloadContent.classList.remove("open");
+    }
+});
+
+document.querySelectorAll(".control-panel, .download-panel").forEach(panel => {
+    panel.addEventListener("click", e => e.stopPropagation());
+});
+
 // Function: Handle map clicks while drawing
 function onMapClick(e) {
     if (!isDrawing) {

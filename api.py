@@ -18,7 +18,7 @@ app.add_middleware(
 app.mount("/static", StaticFiles(directory="website/data"), name="static")
 
 # Host link
-root = "godzilla.bk.tudelft.nl.bagparquet"
+root = "http://127.0.0.1:8000"
 
 # Connect to the DuckDB
 db = duckdb.connect()

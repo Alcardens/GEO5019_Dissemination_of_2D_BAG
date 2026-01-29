@@ -1,11 +1,14 @@
+import os
+from pathlib import Path
 import duckdb as db
 import time
+from concurrent.futures import ProcessPoolExecutor, as_completed
 
-def xml_to_db(XML_PATH):
-    con.sql(f"""
-    INSERT INTO {TABLE}
+SQL_TO_PARQUET = r"""
+COPY (
     WITH docs AS (
-      SELECT xml FROM read_xml_objects('{XML_PATH}', maximum_file_size = 32000000)
+      SELECT xml
+      FROM read_xml_objects($xml_path, maximum_file_size = 32000000)
     ),
     vbos_xml AS (
       SELECT unnest(xml_extract_elements(xml, '//Objecten:Verblijfsobject')) AS vbo_xml
@@ -18,6 +21,8 @@ def xml_to_db(XML_PATH):
         xml_extract_text(vbo_xml, '//Objecten:gebruiksdoel')[1] AS gebruiksdoel,
         TRY_CAST(xml_extract_text(vbo_xml, '//Objecten:oppervlakte')[1] AS INTEGER) AS oppervlakte,
         TRY_CAST(xml_extract_text(vbo_xml, '//Objecten:documentdatum')[1] AS DATE) AS documentdatum,
+        xml_extract_text(vbo_xml, '//Objecten:geconstateerd')[1] AS geconstateerd,
+        xml_extract_text(vbo_xml, '//Objecten:documentnummer')[1] AS documentnummer,
         xml_extract_text(vbo_xml, '//Objecten-ref:PandRef')[1] AS pand,
         xml_extract_text(vbo_xml, '//Objecten:heeftAlsHoofdadres/Objecten-ref:NummeraanduidingRef')[1] AS hoofdadres,
         xml_extract_text(vbo_xml, '//gml:pos')[1] AS pos
@@ -30,6 +35,8 @@ def xml_to_db(XML_PATH):
       gebruiksdoel,
       documentdatum,
       oppervlakte,
+      geconstateerd,
+      documentnummer,
       pand,
       hoofdadres,
       ST_GeomFromText(
@@ -44,49 +51,89 @@ def xml_to_db(XML_PATH):
         gebruiksdoel,
         documentdatum,
         oppervlakte,
+        geconstateerd,
+        documentnummer,
         pand,
         hoofdadres,
         list_filter(str_split(pos, ' '), x -> x <> '') AS nums
-      FROM extracted
-    ) t
-    """)
+      FROM extracted)
+    ) TO $out_parquet (FORMAT 'parquet')
+    """
 
-if __name__ == "__main__":
-    con = db.connect('vbo.db')
+def _process_one_xml(xml_path: str, out_parquet: str, use_webbed: bool = True) -> str:
+    """
+    Worker: XML -> Parquet shard.
+    Returns the parquet path (for merging).
+    """
+    con = db.connect(database=":memory:")
+
     con.install_extension("spatial")
     con.load_extension("spatial")
-    con.execute("INSTALL webbed FROM community")
-    con.load_extension("webbed")
 
-    TABLE = "verblijfsobjecten"
+    if use_webbed:
+        con.execute("INSTALL webbed FROM community")
+        con.load_extension("webbed")
 
-    tic = time.time()
-
-    con.sql(f"DROP TABLE IF EXISTS {TABLE};")
-    con.sql(f"""
-    CREATE TABLE {TABLE} (
-      identificatie TEXT,
-      status TEXT,
-      gebruiksdoel TEXT,
-      documentdatum DATE,
-      oppervlakte INTEGER,
-      pand TEXT,
-      hoofdadres TEXT,
-      geom GEOMETRY
-    );
-    """)
-
-    for i in range(1,2534):
-        XML_PATH = f'vbo\9999VBO08122025-{i:06d}.xml'
-        if i%100 == 0:
-            print(i)
-            print("time:", (time.time() - tic), "s")
-        xml_to_db(XML_PATH)
-
-    tac = time.time()
-
-    print(con.sql(f"SELECT * FROM {TABLE} LIMIT 5;").show())
-
-    print("time:", (tac - tic), "s")
+    con.execute(SQL_TO_PARQUET, {"xml_path": xml_path, "out_parquet": out_parquet})
 
     con.close()
+    return out_parquet
+
+def parallel_xmls_to_single_parquet(
+    xml_paths,
+    final_parquet_path: str,
+    tmp_dir: str = "tmp_parquet_shards",
+    workers: int | None = None,
+    use_webbed: bool = True,
+):
+    """
+    Parallelize per XML file into shard parquets, then merge into one parquet.
+    """
+    tmp_dir_path = Path(tmp_dir)
+    tmp_dir_path.mkdir(parents=True, exist_ok=True)
+
+    # Decide worker count (good default: CPU count)
+    if workers is None:
+        workers = max(1, os.cpu_count() or 1)
+
+    shard_paths = []
+
+    with ProcessPoolExecutor(max_workers=workers) as ex:
+        futures = []
+        for idx, xml_path in enumerate(xml_paths):
+            shard_path = tmp_dir_path / f"shard_{idx:06d}.parquet"
+            futures.append(ex.submit(_process_one_xml, str(xml_path), str(shard_path), use_webbed))
+
+        for f in as_completed(futures):
+            shard_paths.append(f.result())
+
+    # Merge shards -> one final parquet
+    con = db.connect(database=":memory:")
+    con.install_extension("spatial")
+    con.load_extension("spatial")
+    con.execute(
+        '''COPY (SELECT * FROM read_parquet($files) ORDER BY
+         ST_Hilbert(geom, ST_Extent(ST_MakeEnvelope(0, 280000, 310000, 640000))))
+         TO $out (FORMAT 'parquet', COMPRESSION 'zstd');''',
+        {"files": shard_paths, "out": final_parquet_path},
+    )
+    con.close()
+
+if __name__ == "__main__":
+    tic = time.time()
+
+    # Build your XML list (example: 1 file; extend to your range)
+    xml_paths = []
+    for i in range(1, 2354):
+        # Use Path to avoid backslash escape issues
+        xml_paths.append(Path(f"VBO") / f"9999VBO08122025-{i:06d}.xml")
+
+    parallel_xmls_to_single_parquet(
+        xml_paths=xml_paths,
+        final_parquet_path="vbo.parquet",
+        tmp_dir="tmp_panden_shards",
+        workers=None,  # defaults to CPU count
+        use_webbed=True,  # set to False if you don't need it
+    )
+
+    print("time:", (time.time() - tic), "s")

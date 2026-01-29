@@ -60,16 +60,12 @@ def _process_one_xml(xml_path: str, out_parquet: str, use_webbed: bool = True) -
     con.install_extension("spatial")
     con.load_extension("spatial")
 
-    # Only keep this if you truly need it for your environment.
-    # (Many setups don't need webbed at all; removing it speeds up startup.)
     if use_webbed:
         con.execute("INSTALL webbed FROM community")
         con.load_extension("webbed")
 
-    # Your UDF returns WKB bytes (BLOB), despite the name "gml_to_wkt"
     con.create_function("gml_to_wkt", gml_to_wkt, [VARCHAR], BLOB)
 
-    # Use named parameters to avoid quoting/escaping issues (esp. on Windows paths)
     con.execute(SQL_TO_PARQUET, {"xml_path": xml_path, "out_parquet": out_parquet})
 
     con.close()
