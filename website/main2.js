@@ -75,7 +75,7 @@ const vboLayer = protomapsL.leafletLayer({
     {
       dataLayer: "vbo", // must match the *source layer name* inside vbo.pmtiles
       symbolizer: new MyPlaceSymbolizer(),
-      minzoom: 11
+      minzoom: 12
     }
   ],
 }).addTo(map);
